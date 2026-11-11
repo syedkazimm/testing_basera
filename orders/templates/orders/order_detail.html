@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{# US-22: order page and confirmation page (?placed=1). More details are added by US-23. #}
+{% block title %}Order {{ order.number }}{% endblock %}
+{% block content %}
+{% if just_placed %}
+  <div class="alert alert-success">
+    <h1 class="h4">Thank you! Your order has been placed.</h1>
+    <p class="mb-0">Your order number is <strong>{{ order.number }}</strong>. A confirmation has been emailed to you.
+       Pay in cash when the plants arrive.</p>
+  </div>
+{% else %}
+  <h1 class="h3 mb-3">Order {{ order.number }}</h1>
+{% endif %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <p>Status: <span class="badge text-bg-success">{{ order.get_status_display }}</span>
+       &middot; Placed {{ order.created_at|date:"j M Y, H:i" }}</p>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th>Plant</th><th class="text-end">Unit price</th><th class="text-end">Qty</th><th class="text-end">Line total</th></tr></thead>
+        <tbody>
+          {% for item in order.items.all %}
+            <tr><td>{{ item.species_name }}</td>
+                <td class="text-end">Rs {{ item.unit_price|floatformat:"0g" }}</td>
+                <td class="text-end">{{ item.quantity }}</td>
+                <td class="text-end">Rs {{ item.line_total|floatformat:"0g" }}</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot><tr><th colspan="3" class="text-end">Total</th><th class="text-end">Rs {{ order.total|floatformat:"0g" }}</th></tr></tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card"><div class="card-body">
+      <h2 class="h5">Delivered to</h2>
+      <p>{{ order.delivery_name }}<br>{{ order.delivery_address|linebreaksbr }}<br>{{ order.delivery_city }}<br>{{ order.delivery_phone }}</p>
+      <h2 class="h5">Payment</h2>
+      <p class="mb-0">{{ order.get_payment_method_display }}</p>
+    </div></div>
+  </div>
+</div>
+<a href="{% url 'catalogue' %}" class="btn btn-outline-basera mt-3">Keep browsing</a>
+{% endblock %}

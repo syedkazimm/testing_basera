@@ -2,13 +2,15 @@
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
+from django.db import transaction
 from django.db.models import F, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
-from django.views.generic import FormView, TemplateView
+from django.views.generic import DetailView, FormView, TemplateView
 
 from accounts.mixins import CustomerRequiredMixin
 
@@ -17,7 +19,7 @@ from catalog.models import Species
 from growprofiles.models import GrowProfile
 
 from .forms import DeliveryForm
-from .models import CartItem
+from .models import CartItem, Order, OrderItem
 
 
 def cart_total_quantity(user):
@@ -233,4 +235,122 @@ class CheckoutSummaryView(CheckoutGuardMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context.update(self.cart)
         context["delivery"] = self.request.session[DELIVERY_SESSION_KEY]
+        return context
+
+
+class OrderProblem(Exception):
+    """Raised inside the transaction when the cart cannot be turned into an order; it rolls everything back."""
+
+    def __init__(self, problems):
+        super().__init__("; ".join(problems))
+        self.problems = problems
+
+
+class PlaceOrderView(CustomerRequiredMixin, View):
+    """US-22: turn the cart into an order, all inside one transaction (SPEC 6.2).
+
+    1. lock the species rows; 2. re-check stock (if anything is short, roll back and create nothing);
+    3. create the Order and OrderItems with name and price copied in; 4. lower the stock;
+    5. empty the cart. After the commit: print a confirmation email and show the confirmation page.
+    """
+
+    http_method_names = ["post"]
+
+    def post(self, request):
+        delivery = request.session.get(DELIVERY_SESSION_KEY)
+        if not delivery:
+            return redirect("checkout")
+        try:
+            order = self.place_order(request.user, delivery, self.profile_for_order(request))
+        except OrderProblem as problem:
+            for line in problem.problems:
+                messages.error(request, line)
+            return redirect("cart")
+
+        # Order placed: forget the checkout state, then confirm.
+        request.session.pop(DELIVERY_SESSION_KEY, None)
+        request.session.pop("grow_profile_id", None)
+        return redirect(f"{reverse('order_detail', args=[order.pk])}?placed=1")
+
+    @staticmethod
+    def profile_for_order(request):
+        """The grow profile the customer came from (set when adding from match results), if still theirs."""
+        profile_id = request.session.get("grow_profile_id")
+        return GrowProfile.objects.filter(pk=profile_id, customer=request.user).first() if profile_id else None
+
+    @staticmethod
+    def place_order(user, delivery, profile):
+        with transaction.atomic():
+            cart_items = list(CartItem.objects.filter(customer=user).select_related("species"))
+            if not cart_items:
+                raise OrderProblem(["Your cart is empty."])
+            # 1. Lock the species rows so two checkouts cannot sell the same last plant.
+            locked = {s.pk: s for s in Species.objects.select_for_update().filter(pk__in=[i.species_id for i in cart_items])}
+
+            # 2. Re-check against the locked, current values.
+            problems = []
+            for item in cart_items:
+                species = locked[item.species_id]
+                if species.is_deleted or species.status != Species.Status.ACTIVE or species.is_invasive:
+                    problems.append(f"{species.common_name} is no longer available. Please remove it.")
+                elif item.quantity > species.stock:
+                    problems.append(f"Only {species.stock} {species.common_name} left. Please lower the quantity.")
+            if problems:
+                raise OrderProblem(problems)  # leaves the atomic block, so nothing is saved
+
+            # 3. Order and lines, copying the name and price paid.
+            order = Order.objects.create(
+                customer=user, grow_profile=profile,
+                delivery_name=delivery["name"], delivery_address=delivery["address"],
+                delivery_city=delivery["city"], delivery_phone=delivery["phone"],
+                payment_method=Order.PaymentMethod.COD, total=0,
+            )
+            total = 0
+            for item in cart_items:
+                species = locked[item.species_id]
+                OrderItem.objects.create(order=order, species=species, species_name=species.common_name,
+                                         unit_price=species.price, quantity=item.quantity)
+                total += species.price * item.quantity
+                # 4. Lower the stock.
+                species.stock -= item.quantity
+                species.save(update_fields=["stock"])
+            order.total = total
+            order.save(update_fields=["total"])
+
+            # 5. Empty the cart.
+            CartItem.objects.filter(customer=user).delete()
+
+            # 6. Only once the transaction has really committed, send the confirmation email.
+            transaction.on_commit(lambda: send_confirmation_email(order))
+        return order
+
+
+def send_confirmation_email(order):
+    """Print (console backend) or send the order confirmation. A mail problem never undoes an order."""
+    lines = "\n".join(f"  {i.quantity} x {i.species_name} @ Rs {i.unit_price:,.0f} = Rs {i.line_total:,.0f}"
+                      for i in order.items.all())
+    body = (
+        f"Hello {order.delivery_name},\n\nThank you for your Basera order {order.number}.\n\n{lines}\n\n"
+        f"Total: Rs {order.total:,.0f} (Cash on Delivery)\n\n"
+        f"Deliver to:\n  {order.delivery_name}\n  {order.delivery_address}\n  {order.delivery_city}\n"
+        f"  {order.delivery_phone}\n\nThe Basera team\n"
+    )
+    send_mail(f"Basera order {order.number} confirmed", body, None, [order.customer.email], fail_silently=True)
+
+
+class OrderDetailView(CustomerRequiredMixin, DetailView):
+    """The order page: items, delivery details and status. Doubles as the confirmation page (?placed=1).
+
+    Another customer's order is simply not found (404).
+    """
+
+    template_name = "orders/order_detail.html"
+    context_object_name = "order"
+
+    def get_queryset(self):
+        return Order.objects.filter(customer=self.request.user).prefetch_related("items")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["just_placed"] = self.request.GET.get("placed") == "1"
         return context

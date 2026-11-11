@@ -141,3 +141,10 @@ Each entry records a judgement call made while building Basera.
 - **Delivery details** are kept in the session (`checkout_delivery`) between the form and the summary page (no Order exists yet); coming back to the form shows what was typed. The form is prefilled from the profile (name, default address, default city, phone). All four fields are required and the phone uses the Pakistani regex.
 - **Guard:** checkout and the summary redirect to the cart if it is empty or has an item that is unavailable or above stock, and the summary redirects to the form if no details were saved.
 - **Payment** is shown as plain text "Cash on Delivery" (it is the only option, so there is nothing to choose).
+
+## US-22
+- **Models:** `Order` and `OrderItem` as in SPEC 5.6/5.7; the order number is derived from the id (`BSR-000001`). `Order.grow_profile` is `SET_NULL`, so deleting a profile keeps its orders (the US-07 rule).
+- **Transaction:** `PlaceOrderView.place_order` runs in one `transaction.atomic()`: lock species with `select_for_update()`, re-check availability and stock, create the order and lines (name and price copied), lower stock, empty the cart. Any problem raises `OrderProblem` inside the block, which rolls everything back; the customer is sent to the cart with one message per item to fix. `select_for_update()` really locks on PostgreSQL (production); SQLite ignores it, so concurrent checkouts were only reasoned about, not tested.
+- **Confirmation page:** the order page `/orders/<id>/` shows a "Thank you" banner when opened with `?placed=1` (the redirect after placing). It is the same page My Orders links to, so no extra URL was added.
+- **Email:** sent with `transaction.on_commit`, so it only goes out if the order was really saved; `fail_silently=True` so a mail problem never undoes an order. It prints on the console locally.
+- **Grow profile:** taken from the session (`grow_profile_id`, set when adding from match results) and only used if it still belongs to the customer; the session keys for delivery and profile are cleared after the order.
