@@ -95,3 +95,8 @@ Each entry records a judgement call made while building Basera.
 - **HTMX targets:** changing a control swaps only `#results` (so keyboard focus stays in the controls); clicking a chip or "Clear filters" swaps the whole `#shortlist` block (controls and results) so the controls reset too. The view tells them apart with the `HX-Target` header. A spinner shows while scoring.
 - **No result with filters:** the page lists, for each active filter, how many plants removing just that filter would bring back (the "relax one criterion" suggestion), most helpful first. This is the version of the US-10 suggestion that matters, since the five criteria only change the score and never hide a species.
 - **Price sort ties** fall back to best score, then name.
+
+## US-17
+- **Protected regions:** Django's admin delete page already lists the protected profiles/species and refuses the delete (the POST does nothing). As a safety net `RegionAdmin.delete_model` and `delete_queryset` also catch `ProtectedError` and show an error message instead of a 500 page.
+- **Admin list:** the region list shows how many grow profiles and species use each region.
+- Adding a region needs no other code: the profile and listing forms read the Region table on every request.
