@@ -106,3 +106,8 @@ Each entry records a judgement call made while building Basera.
 - **Image checks:** the picture must be a real JPEG or PNG (checked with Pillow, not just the file name) and at most 2 MB. Without a picture the placeholder is shown.
 - **Where a seller lands:** after saving, the seller goes back to `/seller/listings/` ("My Listings"). It is a plain table for now; US-16 adds thumbnails, search, filters and paging.
 - **Seller URLs** live in `catalog/urls.py` beside the public ones (`/seller/listings/…`).
+
+## US-14
+- **403 vs 404:** a seller opening another seller's existing listing gets a 403; a removed listing (even their own) or a missing id is a 404. Customers get a 403 on every seller page.
+- **Remove = soft delete** (`is_deleted=True`). The row stays so past orders keep working; removed listings disappear from the catalogue, matching, details pages and the seller's own list. There is no "undo" page (the admin can clear the flag).
+- **Remove flow** mirrors profile deletion: a confirmation page without JavaScript, or `hx-confirm` and an in-place row removal with HTMX.

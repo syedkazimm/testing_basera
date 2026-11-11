@@ -10,4 +10,6 @@ urlpatterns = [
     # Seller side (US-13 onwards)
     path("seller/listings/", views.ListingListView.as_view(), name="listing_list"),
     path("seller/listings/new/", views.ListingCreateView.as_view(), name="listing_new"),
+    path("seller/listings/<int:pk>/edit/", views.ListingUpdateView.as_view(), name="listing_edit"),
+    path("seller/listings/<int:pk>/delete/", views.ListingDeleteView.as_view(), name="listing_delete"),
 ]

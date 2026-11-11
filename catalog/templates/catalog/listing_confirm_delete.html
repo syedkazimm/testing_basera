@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{# US-14: remove-listing confirmation page. #}
+{% block title %}Remove listing{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8 col-lg-6">
+  <h1 class="h3 mb-3">Remove listing</h1>
+  <p>Remove <strong>{{ listing.common_name }}</strong> from Basera? Customers will no longer see it, but past
+     orders will still show the name and price they paid.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, remove</button>
+    <a href="{% url 'listing_list' %}" class="btn btn-link">Cancel</a>
+  </form>
+</div></div>
+{% endblock %}

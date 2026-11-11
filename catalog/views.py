@@ -5,7 +5,8 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.http import HttpResponse
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from accounts.mixins import SellerRequiredMixin
 from basera.htmx import is_htmx, redirect_to
@@ -111,3 +112,29 @@ class ListingCreateView(SellerRequiredMixin, ListingFormMixin, CreateView):
     """US-13: create a listing. It starts ACTIVE and is visible in the catalogue at once."""
 
     heading = "New listing"
+
+
+class ListingUpdateView(OwnListingMixin, ListingFormMixin, UpdateView):
+    """US-14: edit my listing. Changes show at once in the catalogue and in matching."""
+
+    heading = "Edit listing"
+
+
+class ListingDeleteView(OwnListingMixin, DeleteView):
+    """US-14: "remove" a listing = soft delete (is_deleted=True).
+
+    The row stays in the database, so past orders still show the name and price paid.
+    GET shows a confirmation page; an HTMX request (already confirmed with hx-confirm) removes the row.
+    """
+
+    template_name = "catalog/listing_confirm_delete.html"
+    success_url = reverse_lazy("listing_list")
+    context_object_name = "listing"
+
+    def form_valid(self, form):
+        self.object.is_deleted = True
+        self.object.save(update_fields=["is_deleted"])
+        if is_htmx(self.request):
+            return HttpResponse("")  # swapped in place of the table row
+        messages.success(self.request, f"Listing “{self.object.common_name}” removed.")
+        return redirect_to(self.request, str(self.success_url))

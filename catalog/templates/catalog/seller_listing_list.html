@@ -9,13 +9,20 @@
 {% if listings %}
   <div class="table-responsive">
     <table class="table align-middle">
-      <thead><tr><th>Name</th><th>Price</th><th>Stock</th></tr></thead>
+      <thead><tr><th>Name</th><th>Price</th><th>Stock</th><th></th></tr></thead>
       <tbody>
         {% for listing in listings %}
-          <tr>
+          <tr id="listing-{{ listing.pk }}">
             <td><a href="{% url 'species_detail' listing.pk %}">{{ listing.common_name }}</a></td>
             <td>Rs {{ listing.price|floatformat:"0g" }}</td>
             <td>{{ listing.stock }}</td>
+            <td class="text-end text-nowrap">
+              <a href="{% url 'listing_edit' listing.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              {# Without JavaScript this opens a confirmation page; with HTMX it asks, then removes the row. #}
+              <a href="{% url 'listing_delete' listing.pk %}" class="btn btn-sm btn-outline-danger"
+                 hx-post="{% url 'listing_delete' listing.pk %}" hx-confirm="Remove the listing {{ listing.common_name }}?"
+                 hx-target="#listing-{{ listing.pk }}" hx-swap="outerHTML swap:200ms">Remove</a>
+            </td>
           </tr>
         {% endfor %}
       </tbody>
