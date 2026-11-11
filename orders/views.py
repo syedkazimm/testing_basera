@@ -1,3 +1,84 @@
-from django.shortcuts import render
+"""Cart and order views (US-19 onwards)."""
 
-# Create your views here.
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
+from django.db.models import F, Sum
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views import View
+
+from basera.htmx import is_htmx
+from catalog.models import Species
+from growprofiles.models import GrowProfile
+
+from .models import CartItem
+
+
+def cart_total_quantity(user):
+    return CartItem.objects.filter(customer=user).aggregate(total=Sum("quantity"))["total"] or 0
+
+
+class CartAddView(View):
+    """US-19: add one plant to the cart (POST only).
+
+    - Guests are sent to log in and then back to the species page (not to this POST-only URL).
+    - Sellers and admins get a 403: only customers shop.
+    - Invasive, inactive, removed or out-of-stock species cannot be added; an existing item goes up
+      by one but never above the stock.
+    - HTMX: replies with the button ("Added ✔") plus the navbar badge as an out-of-band swap.
+    """
+
+    http_method_names = ["post"]
+
+    def post(self, request, species_id):
+        next_url = self.safe_next(request, default=reverse("species_detail", args=[species_id]))
+        if not request.user.is_authenticated:
+            return redirect(f"{reverse('login')}?next={next_url}")
+        if not request.user.is_customer:
+            raise PermissionDenied
+
+        species = get_object_or_404(Species.objects.visible(), pk=species_id)  # inactive/removed: 404
+        added, feedback = self.add(request.user, species)
+        self.remember_profile(request)
+
+        if is_htmx(request):
+            return render(request, "orders/_add_to_cart.html", {
+                "species": species, "added": added, "feedback": feedback,
+                "profile": request.POST.get("profile", ""), "next": next_url,
+                "cart_count": cart_total_quantity(request.user), "oob": True,
+            })
+        (messages.success if added else messages.error)(request, feedback)
+        return HttpResponseRedirect(next_url)
+
+    @staticmethod
+    def add(user, species):
+        """Apply the cart rules. Returns (added?, message)."""
+        if species.is_invasive:
+            return False, f"{species.common_name} is an invasive species and is not sold."
+        if species.stock < 1:
+            return False, f"{species.common_name} is out of stock."
+        item, created = CartItem.objects.get_or_create(customer=user, species=species)
+        if created:
+            return True, f"Added {species.common_name} to your cart."
+        if item.quantity >= species.stock:
+            return False, f"Your cart already has all {species.stock} available {species.common_name}."
+        item.quantity = F("quantity") + 1
+        item.save(update_fields=["quantity"])
+        return True, f"Added another {species.common_name} to your cart."
+
+    @staticmethod
+    def safe_next(request, default):
+        """Only follow a `next` address that stays on this site."""
+        candidate = request.POST.get("next", "")
+        if candidate and url_has_allowed_host_and_scheme(candidate, allowed_hosts={request.get_host()}):
+            return candidate
+        return default
+
+    @staticmethod
+    def remember_profile(request):
+        """When adding from a match page, remember which grow profile led to the purchase (US-22)."""
+        profile_id = request.POST.get("profile", "")
+        if profile_id.isdigit() and GrowProfile.objects.filter(pk=profile_id, customer=request.user).exists():
+            request.session["grow_profile_id"] = int(profile_id)

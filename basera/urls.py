@@ -11,6 +11,7 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("profiles/", include("growprofiles.urls")),
     path("match/", include("matching.urls")),
+    path("cart/", include("orders.urls")),
     path("", include("catalog.urls")),
     # Home page (EN-01)
     path("", TemplateView.as_view(template_name="home.html"), name="home"),

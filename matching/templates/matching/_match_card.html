@@ -34,7 +34,11 @@
           {% endfor %}
         </ul>
         <p class="small mb-2"><strong>Ecological benefit:</strong> {{ species.ecological_benefit }}</p>
-        <a href="{% url 'species_detail' species.pk %}" class="btn btn-sm btn-outline-basera">View details</a>
+        <div class="d-flex flex-wrap gap-2 align-items-start">
+          <a href="{% url 'species_detail' species.pk %}" class="btn btn-sm btn-outline-basera">View details</a>
+          {# Passing the profile lets checkout attach it to the order (US-22). #}
+          {% include "orders/_add_to_cart.html" with profile=profile.pk %}
+        </div>
       </div>
     </div>
   </div>

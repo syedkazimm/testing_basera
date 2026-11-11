@@ -53,7 +53,8 @@
         <tr><th scope="row">Sold by</th><td>{{ species.seller.full_name }}</td></tr>
       </tbody>
     </table>
-    {# The "Add to cart" button is added in Sprint 2 (US-19); it is hidden for invasive or out-of-stock species. #}
+    {# US-19: hidden for invasive or out-of-stock species. #}
+    {% include "orders/_add_to_cart.html" %}
   </div>
 </div>
 {% endblock %}

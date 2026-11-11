@@ -1,0 +1,17 @@
+{% comment %}
+  US-19: the "Add to cart" form for one species. Needs `species`; optional `profile` (match page) and `next`.
+  Shown to guests (they are sent to log in) and customers; hidden for invasive/out-of-stock species and other roles.
+{% endcomment %}
+{% if not species.is_invasive and species.in_stock and not user.is_authenticated or not species.is_invasive and species.in_stock and user.is_customer %}
+<form method="post" action="{% url 'cart_add' species.pk %}" id="add-{{ species.pk }}" class="d-inline"
+      hx-post="{% url 'cart_add' species.pk %}" hx-target="this" hx-swap="outerHTML">
+  {% csrf_token %}
+  {% if profile %}<input type="hidden" name="profile" value="{{ profile }}">{% endif %}
+  <input type="hidden" name="next" value="{% firstof next request.get_full_path %}">
+  <button type="submit" class="btn btn-sm {% if added %}btn-success{% else %}btn-basera{% endif %}">
+    {% if added %}Added &#10004;{% else %}Add to cart{% endif %}
+  </button>
+  {% if feedback and not added %}<div class="small text-danger mt-1" role="alert">{{ feedback }}</div>{% endif %}
+</form>
+{% endif %}
+{% if oob %}{% include "orders/_cart_badge.html" with oob=True %}{% endif %}

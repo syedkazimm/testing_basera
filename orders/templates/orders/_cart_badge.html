@@ -1,0 +1,2 @@
+{# US-19: navbar cart count. With oob=True an HTMX reply can update it from anywhere on the page. #}
+<span id="cart-count" class="badge rounded-pill text-bg-light"{% if oob %} hx-swap-oob="true"{% endif %}>{{ cart_count }}</span>

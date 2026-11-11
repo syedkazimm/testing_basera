@@ -119,3 +119,13 @@ Each entry records a judgement call made while building Basera.
 ## US-16
 - **Dashboard behaviour:** search matches common or scientific name (case-insensitive); the status filter is All / Active / Inactive; 10 per page; the query is always limited to the logged-in seller's own non-removed listings, so no other seller's listing can appear.
 - **HTMX:** search typing (300 ms delay), the status select and paging links update only the `#listing-table` block, and the address bar is kept shareable with `hx-push-url`.
+
+## US-19
+- **Model:** `orders.CartItem` (customer, species, quantity ≥ 1, unique per customer + species). Order and OrderItem are added with US-22.
+- **Add button:** one shared partial, `orders/_add_to_cart.html`, used on catalogue cards, match cards and the detail page. It is shown to guests and customers, and hidden for invasive or out-of-stock species and for sellers/admins. A POST by a seller or admin is a 403.
+- **Guests:** the button posts to `/cart/add/<id>/`, which redirects a guest to login with `?next=` set to the species page (the add URL itself is POST-only, so returning to it would fail). The guest then presses the button again.
+- **HTMX:** the reply is the button re-rendered as "Added ✔" plus the navbar badge as an out-of-band swap (`hx-swap-oob`). Without JavaScript the view redirects back with a Django message. `next` is only followed if it stays on this site.
+- **Navbar count:** the badge shows the total number of plants (sum of quantities). It is plain text until US-20 adds the cart page and turns it into a link.
+- **Grow profile for the order:** when the add button is pressed from a match page it posts the profile id, which is stored in the session (`grow_profile_id`) only if the profile belongs to that customer. US-22 attaches it to the order.
+- **Cart rules at add time:** stock 0, invasive, inactive or removed species are refused (404 for inactive/removed); repeating an add stops at the stock level with a message.
+- **Template note:** Django's `{# #}` comments must fit on one line, so longer notes in templates use `{% comment %}`.

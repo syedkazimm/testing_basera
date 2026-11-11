@@ -4,6 +4,9 @@
   {% if user.is_customer %}
     <li class="nav-item"><a class="nav-link" href="{% url 'profile_list' %}">My profiles</a></li>
   {% endif %}
+  {% if user.is_customer %}
+    <li class="nav-item"><span class="nav-link">Cart {% include "orders/_cart_badge.html" %}</span></li>
+  {% endif %}
   {% if user.is_seller %}
     <li class="nav-item"><a class="nav-link" href="{% url 'listing_list' %}">My listings</a></li>
   {% endif %}
