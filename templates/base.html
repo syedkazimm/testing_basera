@@ -1,0 +1,46 @@
+{% load static %}
+<!doctype html>
+{# EN-01: base layout - navbar, flash messages, footer. Bootstrap 5 + HTMX loaded from CDN. #}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Basera{% endblock %} | Basera</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{% static 'css/basera.css' %}" rel="stylesheet">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+{# The CSRF token is sent with every HTMX request (SPEC 8.1 rule 2). #}
+<body class="d-flex flex-column min-vh-100" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-basera">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{% url 'home' %}">&#127807; Basera</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+              aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        {% include "_navbar_links.html" %}
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4 flex-grow-1">
+    {# Flash messages from django.contrib.messages #}
+    {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer py-3 mt-4 text-center text-muted small">
+    Basera &middot; Native plants for Pakistan &middot; Cash on Delivery only
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

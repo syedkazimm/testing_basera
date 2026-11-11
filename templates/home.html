@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{# EN-01: home page with the pitch and the two main buttons. #}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero p-4 p-md-5 text-center">
+  <h1 class="display-5 fw-bold text-basera">Grow native. Grow Pakistan.</h1>
+  <p class="lead mx-auto" style="max-width: 40rem;">
+    Tell Basera about your sunlight, soil and water, and get a ranked shortlist of native plants that will
+    actually thrive in your space &mdash; with the reasons why.
+  </p>
+  <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+    <a href="#" class="btn btn-basera btn-lg">Find plants for my space</a>
+    <a href="#" class="btn btn-outline-basera btn-lg">Browse catalogue</a>
+  </div>
+</section>
+{% endblock %}

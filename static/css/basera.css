@@ -1,0 +1,17 @@
+/* Basera: a little CSS on top of Bootstrap for the green-and-white look. */
+:root { --basera-green: #2e7d32; --basera-green-dark: #1b5e20; --basera-leaf: #e8f5e9; }
+
+.bg-basera { background-color: var(--basera-green) !important; }
+.btn-basera { background-color: var(--basera-green); border-color: var(--basera-green); color: #fff; }
+.btn-basera:hover, .btn-basera:focus { background-color: var(--basera-green-dark); border-color: var(--basera-green-dark); color: #fff; }
+.btn-outline-basera { color: var(--basera-green); border-color: var(--basera-green); }
+.btn-outline-basera:hover { background-color: var(--basera-green); color: #fff; }
+.text-basera { color: var(--basera-green) !important; }
+
+.hero { background: var(--basera-leaf); border-radius: .75rem; }
+.species-card img { height: 180px; object-fit: cover; }
+.footer { background: var(--basera-leaf); }
+
+/* HTMX spinner is hidden until a request is running. */
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: inline-block; }
