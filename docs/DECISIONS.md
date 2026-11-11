@@ -22,3 +22,15 @@ Each entry records a judgement call made while building Basera.
 - **Login form:** the generic error text is "Incorrect email or password." for wrong password, unknown email and inactive accounts alike. Email is lower-cased before checking.
 - **Logout:** a POST button in the navbar (Django 5's `LogoutView` rejects GET); it lands on home.
 - **Logged-in visitors** who open the login or sign-up page are sent on (login → their landing page, sign-up → home).
+
+## EN-02
+- **Where things live:** `Region` and the shared choice lists (sunlight, soil, water, purpose, space type) are in `growprofiles/models.py`; `Species` and `SpeciesRegion` are in `catalog/models.py`. The seed command is `catalog/management/commands/seed_demo.py` and its data table is `catalog/seed_data.py`.
+- **Sample grow profile deferred:** the `GrowProfile` model is built in US-06 (a story creates only the models it needs), so the seed command gains the demo customer's sample profile in that story.
+- **Species count:** the spec's table has 35 rows; all 35 are seeded (4 flagged invasive).
+- **Prices and stock:** derived deterministically from each species' position in the list (Rs 188 - 2,418; stock 5 - 50), so repeated runs give the same data.
+- **Idempotent seeding:** a species is matched by seller + scientific name and only created if absent, so a seller's later edits are never overwritten. Regions are matched by name; accounts by email.
+- **Demo password:** a single demo password (`Basera-demo-2026`) is used for all three demo accounts, printed only when an account is created. Setting the `DEMO_PASSWORD` environment variable overrides it, which production should do because `build.sh` runs the seed.
+- **Demo admin:** `admin@basera.test` is a superuser; its `role` stays CUSTOMER (role is irrelevant for admins).
+- **Naturalised plants:** Aloe vera and Marigold are kept, with a note in their ecological benefit that they are widely naturalised rather than strictly native (as the spec allows).
+- **Species images:** seeded species have no uploaded image and show `static/img/placeholder.png` (a generated leaf graphic), which the spec allows ("images may be placeholders"). `static/img/species/` is left empty.
+- **Admin:** species can be edited in the admin with regions as an inline; `is_invasive` is editable there (and nowhere else).
