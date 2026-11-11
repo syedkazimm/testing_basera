@@ -1,0 +1,8 @@
+{# US-13 / US-14: listing form partial (swapped in place by HTMX when validation fails). #}
+<form method="post" enctype="multipart/form-data" action="{{ form_action }}"
+      hx-post="{{ form_action }}" hx-encoding="multipart/form-data" hx-target="this" hx-swap="outerHTML" novalidate>
+  {% csrf_token %}
+  {% include "_form_fields.html" %}
+  <button type="submit" class="btn btn-basera">Save listing</button>
+  <a href="{% url 'listing_list' %}" class="btn btn-link">Cancel</a>
+</form>

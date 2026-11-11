@@ -100,3 +100,9 @@ Each entry records a judgement call made while building Basera.
 - **Protected regions:** Django's admin delete page already lists the protected profiles/species and refuses the delete (the POST does nothing). As a safety net `RegionAdmin.delete_model` and `delete_queryset` also catch `ProtectedError` and show an error message instead of a 500 page.
 - **Admin list:** the region list shows how many grow profiles and species use each region.
 - Adding a region needs no other code: the profile and listing forms read the Region table on every request.
+
+## US-13
+- **Form fields:** all species fields except `seller`, `is_invasive` and `status`. Purposes and regions are checkbox groups (at least one of each is required). `status` is added to the form in US-15; new listings start ACTIVE through the model default.
+- **Image checks:** the picture must be a real JPEG or PNG (checked with Pillow, not just the file name) and at most 2 MB. Without a picture the placeholder is shown.
+- **Where a seller lands:** after saving, the seller goes back to `/seller/listings/` ("My Listings"). It is a plain table for now; US-16 adds thumbnails, search, filters and paging.
+- **Seller URLs** live in `catalog/urls.py` beside the public ones (`/seller/listings/…`).

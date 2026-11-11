@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{# US-13 / US-14: create or edit a listing. The form is a partial so HTMX can swap in errors. #}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-8">
+  <h1 class="h3 mb-3">{{ heading }}</h1>
+  {% include "catalog/_listing_form.html" %}
+</div></div>
+{% endblock %}

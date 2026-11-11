@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{# US-13: "My Listings" (search, filter and paging are added by US-16). #}
+{% block title %}My listings{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">My listings</h1>
+  <a href="{% url 'listing_new' %}" class="btn btn-basera">New listing</a>
+</div>
+{% if listings %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Name</th><th>Price</th><th>Stock</th></tr></thead>
+      <tbody>
+        {% for listing in listings %}
+          <tr>
+            <td><a href="{% url 'species_detail' listing.pk %}">{{ listing.common_name }}</a></td>
+            <td>Rs {{ listing.price|floatformat:"0g" }}</td>
+            <td>{{ listing.stock }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="alert alert-info">You have no listings yet. <a href="{% url 'listing_new' %}" class="alert-link">Create your first listing</a>.</div>
+{% endif %}
+{% endblock %}
