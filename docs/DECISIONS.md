@@ -156,3 +156,10 @@ Each entry records a judgement call made while building Basera.
 ## US-24
 - **Cancel flow:** the "Cancel order" button shows only on PENDING orders and opens a confirmation page; the POST runs in one `transaction.atomic()` that locks the order row, re-checks it is still PENDING (so a double click or a seller confirming at the same moment cannot restock twice), sets CANCELLED and adds each line's quantity back to its species' stock (also for soft-deleted species).
 - **Not pending:** trying to cancel a confirmed/shipped/delivered/cancelled order shows an error message and changes nothing; another customer's order is a 404.
+
+## US-25
+- **Seller orders page** (`/seller/orders/`): orders newest first that contain at least one of the seller's species (`items__species__seller`, distinct). Every line of the order is shown, the seller's own lines are highlighted and tagged "Your listing", and the delivery details are shown so the seller can ship. No paging (a few orders per seller is the expected demo size).
+- **Shared status (SPEC 6.3 simplification):** status lives on the order, so when an order contains plants from several sellers any one of those sellers may advance it for everyone. Recorded as the spec asks.
+- **One step at a time:** `Order.next_status` gives the single allowed next status (Pending → Confirmed → Shipped → Delivered; Delivered and Cancelled have none). The advance form also posts the status the seller was looking at; if the order has changed since (double click, or another seller moved it) the click is ignored with a message, so steps cannot be skipped. The change runs in a transaction with the order row locked.
+- **URL file:** the seller routes live in `orders/seller_urls.py`, mounted at `/seller/orders/`.
+- **Seller access:** an order with none of the seller's listings is a 404 for that seller; customers get a 403 on these pages.

@@ -1,0 +1,33 @@
+{# US-25: one order block on the seller's page (also the HTMX reply after advancing it). Needs `order`. #}
+<div class="card mb-3" id="order-{{ order.pk }}">
+  <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <span><strong>{{ order.number }}</strong> &middot; {{ order.created_at|date:"j M Y, H:i" }}</span>
+    <span class="badge {% if order.status == 'CANCELLED' %}text-bg-secondary{% elif order.status == 'DELIVERED' %}text-bg-success{% else %}text-bg-info{% endif %}">{{ order.get_status_display }}</span>
+  </div>
+  <div class="card-body">
+    {% if message %}<div class="alert alert-warning py-2" role="alert">{{ message }}</div>{% endif %}
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-2">
+        <tbody>
+          {% for item in order.items.all %}
+            <tr {% if item.species.seller_id == user.pk %}class="table-success"{% endif %}>
+              <td>{{ item.species_name }}{% if item.species.seller_id == user.pk %} <span class="badge text-bg-success">Your listing</span>{% endif %}</td>
+              <td class="text-end">{{ item.quantity }} &times; Rs {{ item.unit_price|floatformat:"0g" }}</td>
+              <td class="text-end">Rs {{ item.line_total|floatformat:"0g" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot><tr><th colspan="2" class="text-end">Order total</th><th class="text-end">Rs {{ order.total|floatformat:"0g" }}</th></tr></tfoot>
+      </table>
+    </div>
+    <p class="small mb-2"><strong>Deliver to:</strong> {{ order.delivery_name }}, {{ order.delivery_address }}, {{ order.delivery_city }} &middot; {{ order.delivery_phone }} &middot; {{ order.get_payment_method_display }}</p>
+    {% if order.next_status %}
+      <form method="post" action="{% url 'seller_order_advance' order.pk %}"
+            hx-post="{% url 'seller_order_advance' order.pk %}" hx-target="#order-{{ order.pk }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="from" value="{{ order.status }}">
+        <button type="submit" class="btn btn-sm btn-basera">Mark as {{ order.next_status|title }}</button>
+      </form>
+    {% endif %}
+  </div>
+</div>

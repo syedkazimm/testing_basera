@@ -12,7 +12,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
-from accounts.mixins import CustomerRequiredMixin
+from accounts.mixins import CustomerRequiredMixin, SellerRequiredMixin
 
 from basera.htmx import is_htmx, redirect_to
 from catalog.models import Species
@@ -397,3 +397,51 @@ class OrderCancelView(CustomerRequiredMixin, View):
                 Species.objects.filter(pk=item.species_id).update(stock=F("stock") + item.quantity)
         messages.success(request, f"Order {order.number} has been cancelled.")
         return redirect("order_detail", pk=order.pk)
+
+
+# --- Seller fulfilment (US-25) ------------------------------------------------------------------
+def orders_for_seller(user):
+    """Orders that contain at least one of this seller's species (never anyone else's orders)."""
+    return (Order.objects.filter(items__species__seller=user).distinct()
+            .select_related("customer").prefetch_related("items__species").order_by("-created_at", "-id"))
+
+
+class SellerOrderListView(SellerRequiredMixin, ListView):
+    """US-25: "Orders" - orders containing my listings; my own lines are highlighted."""
+
+    template_name = "orders/seller_order_list.html"
+    context_object_name = "orders"
+
+    def get_queryset(self):
+        return orders_for_seller(self.request.user)
+
+
+class SellerOrderAdvanceView(SellerRequiredMixin, View):
+    """US-25: move an order exactly one step forward (POST).
+
+    The form also sends the status the seller was looking at; if the order has moved on meanwhile
+    (a double click, or another seller advanced it), nothing happens, so a step can never be skipped.
+    HTMX: replies with just that order's block so it updates in place.
+    """
+
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        get_object_or_404(orders_for_seller(request.user), pk=pk)  # 404 if it has none of my listings
+        message = None
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(pk=pk)
+            next_status = order.next_status
+            if order.status != request.POST.get("from"):
+                message = f"Order {order.number} was already updated; it is now {order.get_status_display()}."
+            elif next_status is None:
+                message = f"Order {order.number} is {order.get_status_display()} and cannot be advanced."
+            else:
+                order.status = next_status
+                order.save(update_fields=["status"])
+        if is_htmx(request):
+            order = orders_for_seller(request.user).get(pk=pk)
+            return render(request, "orders/_seller_order.html", {"order": order, "message": message})
+        (messages.error if message else messages.success)(
+            request, message or f"Order {order.number} is now {order.get_status_display()}.")
+        return redirect("seller_order_list")

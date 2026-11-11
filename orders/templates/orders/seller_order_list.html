@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{# US-25: seller fulfilment page. Each order is a partial block so HTMX can update it in place. #}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Orders for my plants</h1>
+{% if orders %}
+  <p class="text-muted small">Lines for your own listings are highlighted. Move an order one step at a time.</p>
+  {% for order in orders %}
+    {% include "orders/_seller_order.html" %}
+  {% endfor %}
+{% else %}
+  <div class="alert alert-info">No orders contain your listings yet.</div>
+{% endif %}
+{% endblock %}

@@ -72,6 +72,14 @@ class Order(models.Model):
         return self.number
 
     @property
+    def next_status(self):
+        """The one status this order may move to next (None for DELIVERED and CANCELLED)."""
+        order = [self.Status.PENDING, self.Status.CONFIRMED, self.Status.SHIPPED, self.Status.DELIVERED]
+        if self.status in order[:-1]:
+            return order[order.index(self.status) + 1]
+        return None
+
+    @property
     def number(self):
         """The order number shown to people, e.g. BSR-000123."""
         return f"BSR-{self.pk:06d}"

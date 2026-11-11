@@ -10,6 +10,7 @@
   {% endif %}
   {% if user.is_seller %}
     <li class="nav-item"><a class="nav-link" href="{% url 'listing_list' %}">My listings</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'seller_order_list' %}">Orders</a></li>
   {% endif %}
   <li class="nav-item"><a class="nav-link" href="{% url 'catalogue' %}">Catalogue</a></li>
 </ul>
