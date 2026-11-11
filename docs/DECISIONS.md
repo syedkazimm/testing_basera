@@ -84,3 +84,8 @@ Each entry records a judgement call made while building Basera.
 ## US-05
 - **Any logged-in user** (customer, seller or admin) can open `/accounts/profile/`; it always edits the current user, so there is no way to open another user's profile. First and last name are required, phone is optional and validated, and email and role are shown read-only (the form does not contain them, so a forged POST cannot change them).
 - **Navbar:** a "Profile (full name)" link replaces the plain name label.
+
+## US-07
+- **Delete flow:** without JavaScript the Delete link opens a confirmation page (POST to delete). With HTMX the same link asks with `hx-confirm`, posts, and the server answers with an empty body so the row disappears in place.
+- **Orders:** the `Order.grow_profile` link (set to NULL when a profile is deleted) is created with the Order model in Sprint 2, so the "orders keep existing" rule is enforced there by `on_delete=SET_NULL`.
+- **Ownership:** edit and delete use the same owner-filtered queryset as the list, so another customer's profile is a 404 for both viewing and posting.

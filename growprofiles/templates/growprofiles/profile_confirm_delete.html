@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{# US-07: delete confirmation page. #}
+{% block title %}Delete profile{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8 col-lg-6">
+  <h1 class="h3 mb-3">Delete grow profile</h1>
+  <p>Are you sure you want to delete <strong>{{ profile.name }}</strong>? Orders you have already placed
+     will not be affected.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a href="{% url 'profile_list' %}" class="btn btn-link">Cancel</a>
+  </form>
+</div></div>
+{% endblock %}
