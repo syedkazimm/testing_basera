@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{# US-24: cancel-order confirmation page. #}
+{% block title %}Cancel order {{ order.number }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8 col-lg-6">
+  <h1 class="h3 mb-3">Cancel order {{ order.number }}?</h1>
+  <p>This order has not been confirmed yet. If you cancel it, the plants go back into stock and nothing is charged.</p>
+  <ul>{% for item in order.items.all %}<li>{{ item.quantity }} &times; {{ item.species_name }}</li>{% endfor %}</ul>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, cancel this order</button>
+    <a href="{% url 'order_detail' order.pk %}" class="btn btn-link">Keep my order</a>
+  </form>
+</div></div>
+{% endblock %}

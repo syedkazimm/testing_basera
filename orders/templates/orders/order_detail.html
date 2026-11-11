@@ -13,7 +13,7 @@
 {% endif %}
 <div class="row g-4">
   <div class="col-lg-7">
-    <p>Status: <span class="badge text-bg-success">{{ order.get_status_display }}</span>
+    <p>Status: <span class="badge {% if order.status == 'CANCELLED' %}text-bg-secondary{% else %}text-bg-success{% endif %}">{{ order.get_status_display }}</span>
        &middot; Placed {{ order.created_at|date:"j M Y, H:i" }}</p>
     <div class="table-responsive">
       <table class="table align-middle">
@@ -43,6 +43,9 @@
     </div></div>
   </div>
 </div>
+{% if order.status == "PENDING" %}
+  <a href="{% url 'order_cancel' order.pk %}" class="btn btn-outline-danger mt-3">Cancel order</a>
+{% endif %}
 <a href="{% url 'order_list' %}" class="btn btn-outline-secondary mt-3">All my orders</a>
 <a href="{% url 'catalogue' %}" class="btn btn-outline-basera mt-3">Keep browsing</a>
 {% endblock %}

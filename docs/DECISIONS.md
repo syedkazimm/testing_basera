@@ -152,3 +152,7 @@ Each entry records a judgement call made while building Basera.
 ## US-23
 - **My Orders** (`/orders/`) lists only the logged-in customer's orders, newest first, with number, date, status badge and total. The order page now also shows the grow profile used (name and region) when the link still exists; after a profile is deleted the line is simply left out.
 - **Navbar:** a "My orders" link for customers.
+
+## US-24
+- **Cancel flow:** the "Cancel order" button shows only on PENDING orders and opens a confirmation page; the POST runs in one `transaction.atomic()` that locks the order row, re-checks it is still PENDING (so a double click or a seller confirming at the same moment cannot restock twice), sets CANCELLED and adds each line's quantity back to its species' stock (also for soft-deleted species).
+- **Not pending:** trying to cancel a confirmed/shipped/delivered/cancelled order shows an error message and changes nothing; another customer's order is a 404.

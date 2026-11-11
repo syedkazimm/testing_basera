@@ -365,3 +365,35 @@ class OrderDetailView(CustomerRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context["just_placed"] = self.request.GET.get("placed") == "1"
         return context
+
+
+class OrderCancelView(CustomerRequiredMixin, View):
+    """US-24: cancel one of my orders, but only while it is still PENDING.
+
+    GET shows a confirmation page. POST runs inside one transaction: lock the order, check it is still
+    PENDING, set CANCELLED and add the quantities back to the species' stock.
+    """
+
+    def get_order(self, request, pk):
+        return get_object_or_404(Order.objects.prefetch_related("items"), pk=pk, customer=request.user)  # 404 if not mine
+
+    def get(self, request, pk):
+        order = self.get_order(request, pk)
+        if order.status != Order.Status.PENDING:
+            messages.error(request, "Only pending orders can be cancelled.")
+            return redirect("order_detail", pk=order.pk)
+        return render(request, "orders/order_cancel.html", {"order": order})
+
+    def post(self, request, pk):
+        self.get_order(request, pk)  # 404 for someone else's order
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(pk=pk)  # lock, so two clicks cannot both restock
+            if order.status != Order.Status.PENDING:
+                messages.error(request, "Only pending orders can be cancelled.")
+                return redirect("order_detail", pk=order.pk)
+            order.status = Order.Status.CANCELLED
+            order.save(update_fields=["status"])
+            for item in order.items.all():
+                Species.objects.filter(pk=item.species_id).update(stock=F("stock") + item.quantity)
+        messages.success(request, f"Order {order.number} has been cancelled.")
+        return redirect("order_detail", pk=order.pk)
