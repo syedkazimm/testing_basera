@@ -1,10 +1,13 @@
 """Project URL routes. Each app owns its own urls.py (added story by story)."""
 
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve
 from django.views.generic import TemplateView
+
+admin.site.site_header = "Basera administration"
+admin.site.site_title = "Basera admin"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -20,6 +23,6 @@ urlpatterns = [
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
 ]
 
-# Serve uploaded images during local development only.
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Uploaded species images. A small demo site serves them straight from MEDIA_ROOT, in production too
+# (the free host's disk is ephemeral, so they may vanish on redeploy - see the README).
+urlpatterns += [re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT})]

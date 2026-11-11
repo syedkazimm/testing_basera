@@ -42,16 +42,46 @@ Set the `DEMO_PASSWORD` environment variable before seeding to use a different p
 The seed data has 5 regions, 35 native species (4 flagged invasive), and a sample grow profile
 called "Backyard" for the demo customer.
 
+## What you can do
+
+**Guests** browse the catalogue (search as you type) and species pages, sign up and log in.
+
+**Customers**
+1. Create one or more **grow profiles** (region, indoor/outdoor, sunlight, soil, water, goal) under
+   *Find plants* / *My profiles*; edit or delete them.
+2. Click **Find plants** on a profile for a ranked list of native species with a 0-100% score, the reasons
+   (✔ match, ◐ partial, ✘ no match) and the ecological benefit. Invasive species never appear.
+   Filter by purpose, indoor/outdoor and price, and sort, without a page reload.
+3. **Add to cart**, review the cart, enter delivery details, place the order (Cash on Delivery) and see
+   it under *My orders*. Pending orders can be cancelled and the stock returns.
+4. Manage the **profile** (*Profile*), change the password, or reset a forgotten one (the email is printed
+   in the terminal when running locally).
+
+**Sellers** (`seller@basera.test`) manage **My listings** (create, edit, remove, stock, active/inactive,
+search, filter) and move orders for their plants through Pending → Confirmed → Shipped → Delivered on
+**Orders**.
+
+**Admins** (`admin@basera.test`, at `/admin/`) manage regions (a region in use cannot be deleted),
+flag invasive species, deactivate listings and manage users.
+
 ## Sprint 1 demo script
 
 1. **Sign up** at `/accounts/signup/` as a Customer (or use the demo customer).
 2. **Log in** at `/accounts/login/`; you land on "My Grow Profiles".
-3. **Create a grow profile** with "New profile" (name, region, indoor/outdoor, sunlight, soil, water, goal).
-4. Click **Find plants** on the profile. You see native species ranked by a 0-100% score, each with
-   reasons (✔ match, ◐ partial, ✘ no match) and its ecological benefit. Invasive species never appear.
-5. Click **View details** on a species to open its page.
-6. Open the **Catalogue** and search (results update as you type). Invasive species appear there with a
-   red "Invasive — not sold" warning.
+3. **Create a grow profile** with "New profile".
+4. Click **Find plants**: a ranked list with scores and reasons; invasive species are never shown.
+5. Click **View details** on a species.
+6. Open the **Catalogue** and search. Invasive species appear there with a red warning and no cart button.
+
+## Sprint 2 demo script
+
+1. As the customer, on a match card press **Add to cart** (the button turns into "Added ✔" and the cart
+   count in the navbar updates). Open **Cart**, change a quantity, then **Checkout**.
+2. Enter delivery details (phone like `03001234567`), review the summary and **Place order**. The
+   confirmation email appears in the terminal.
+3. Log out and log in as `seller@basera.test`. Under **Orders** press *Mark as Confirmed*. Log back in as the
+   customer and open **My orders** to see the new status.
+4. As the seller, create a listing under **My listings**; it appears in the catalogue at once.
 
 ## Environment variables
 
@@ -85,8 +115,13 @@ never duplicate data.
 **Uploaded images:** free hosts have an ephemeral disk, so images uploaded in production may disappear on
 redeploy. The demo species use the built-in placeholder image so the site always looks complete.
 
+**Before presenting:** the botanical attributes in the seed data are an illustrative starting set. Check
+them against a reliable source such as Flora of Pakistan.
+
 ## Project layout
 
-`accounts` (users, login) · `growprofiles` (regions, grow profiles) · `catalog` (species, catalogue) ·
-`matching` (scoring service and results) · `orders` (cart and orders, Sprint 2). Shared templates are in
-`templates/`, shared helpers in `basera/forms.py` and `basera/htmx.py`.
+`accounts` (users, login, profile) · `growprofiles` (regions, grow profiles) · `catalog` (species,
+catalogue, seller listings) · `matching` (scoring in `services.py`, results page) · `orders` (cart, checkout,
+orders, seller fulfilment). Shared templates are in `templates/`, shared helpers in `basera/forms.py` and
+`basera/htmx.py`. Every view's docstring names its user story. No automated tests were written, as the spec
+asks; every story was checked by running it.

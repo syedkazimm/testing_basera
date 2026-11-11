@@ -163,3 +163,11 @@ Each entry records a judgement call made while building Basera.
 - **One step at a time:** `Order.next_status` gives the single allowed next status (Pending → Confirmed → Shipped → Delivered; Delivered and Cancelled have none). The advance form also posts the status the seller was looking at; if the order has changed since (double click, or another seller moved it) the click is ignored with a message, so steps cannot be skipped. The change runs in a transaction with the order row locked.
 - **URL file:** the seller routes live in `orders/seller_urls.py`, mounted at `/seller/orders/`.
 - **Seller access:** an order with none of the seller's listings is a 404 for that seller; customers get a 403 on these pages.
+
+## Final polish
+- **Navbar:** customers see "Find plants" and "My profiles" as the spec lists them; both open the profile list, where each profile has its own "Find plants" button (a match needs a profile).
+- **Admin tidy-up:** orders (read-only record of what was bought, with lines inline) and cart items are registered; the species list can flag invasive / change status in place and has bulk "deactivate" and "flag invasive" actions; the admin header says "Basera administration".
+- **Uploaded images in production:** `/media/` is served by Django (`django.views.static.serve`) even with `DEBUG=False`, which is fine at demo scale; the files still disappear when the free host redeploys.
+- **HTTPS settings:** when `DEBUG` is off, session and CSRF cookies are HTTPS-only and plain HTTP redirects to HTTPS (Render terminates TLS and sets the forwarded-protocol header). HSTS is left off on purpose, since turning it on is hard to undo.
+- **Performance check:** with 521 species, scoring took about 7 ms and the whole match page about 80 ms (SQLite, laptop), far inside the 2-second target.
+- **Not done / not verifiable here:** the app has not been deployed (no host account), so the live URL in the README is a placeholder; real concurrent checkouts on PostgreSQL were not exercised; pages were checked through Django's test client and HTTP responses, not in a real browser, so the HTMX in-page behaviour and the 360 px layout have not been seen on screen.

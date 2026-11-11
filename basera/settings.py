@@ -31,6 +31,10 @@ CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
 
 # Behind Render's proxy the request arrives as HTTP; trust the forwarded header.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# In production (DEBUG off) only send cookies over HTTPS and redirect plain HTTP to HTTPS.
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG
 
 # --- Applications -----------------------------------------------------------
 INSTALLED_APPS = [

@@ -2,6 +2,7 @@
 <ul class="navbar-nav me-auto">
   <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
   {% if user.is_customer %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'profile_list' %}">Find plants</a></li>
     <li class="nav-item"><a class="nav-link" href="{% url 'profile_list' %}">My profiles</a></li>
   {% endif %}
   {% if user.is_customer %}
