@@ -111,3 +111,7 @@ Each entry records a judgement call made while building Basera.
 - **403 vs 404:** a seller opening another seller's existing listing gets a 403; a removed listing (even their own) or a missing id is a 404. Customers get a 403 on every seller page.
 - **Remove = soft delete** (`is_deleted=True`). The row stays so past orders keep working; removed listings disappear from the catalogue, matching, details pages and the seller's own list. There is no "undo" page (the admin can clear the flag).
 - **Remove flow** mirrors profile deletion: a confirmation page without JavaScript, or `hx-confirm` and an in-place row removal with HTMX.
+
+## US-15
+- **Availability and stock** are fields on the listing form (create and edit): a seller sets stock (0 = "Out of stock") and Active/Inactive there. There is no separate toggle page. An inactive listing disappears from the catalogue, details page and matching for customers, but the seller still sees it (with an "Inactive" badge).
+- **Automatic stock changes:** stock goes down when an order is placed and back up on cancellation; both are built with the order stories (US-22, US-24). The "cannot be added to a cart" rule for stock 0 is enforced in US-19.

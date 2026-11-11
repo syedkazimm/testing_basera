@@ -26,16 +26,19 @@ class SpeciesForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Species
         fields = [
-            "common_name", "scientific_name", "description", "image", "price", "stock",
+            "common_name", "scientific_name", "description", "image", "price", "stock", "status",
             "sunlight", "water", "soil", "setting", "plant_type", "purposes",
             "ecological_benefit", "regions",
         ]
         labels = {"sunlight": "Preferred sunlight", "water": "Water needed", "soil": "Preferred soil",
-                  "setting": "Grows", "plant_type": "Plant type", "image": "Photo"}
+                  "setting": "Grows", "plant_type": "Plant type", "image": "Photo",
+                  "stock": "Stock (plants in hand)", "status": "Availability"}
         help_texts = {
             "image": "JPG or PNG, up to 2 MB. A placeholder is shown if you skip this.",
             "soil": "Choose loam if the plant is adaptable to most soils.",
             "price": "In Pakistani rupees.",
+            "stock": "Set to 0 to show \"Out of stock\". Stock goes down automatically when orders are placed.",
+            "status": "Inactive listings are hidden from customers; switch back to Active any time.",
         }
         widgets = {"description": forms.Textarea(attrs={"rows": 4}),
                    "ecological_benefit": forms.Textarea(attrs={"rows": 2})}

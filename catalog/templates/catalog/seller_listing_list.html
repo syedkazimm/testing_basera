@@ -9,13 +9,14 @@
 {% if listings %}
   <div class="table-responsive">
     <table class="table align-middle">
-      <thead><tr><th>Name</th><th>Price</th><th>Stock</th><th></th></tr></thead>
+      <thead><tr><th>Name</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
       <tbody>
         {% for listing in listings %}
           <tr id="listing-{{ listing.pk }}">
             <td><a href="{% url 'species_detail' listing.pk %}">{{ listing.common_name }}</a></td>
             <td>Rs {{ listing.price|floatformat:"0g" }}</td>
-            <td>{{ listing.stock }}</td>
+            <td>{{ listing.stock }}{% if not listing.in_stock %} <span class="badge text-bg-secondary">Out of stock</span>{% endif %}</td>
+            <td>{% if listing.status == "ACTIVE" %}<span class="badge text-bg-success">Active</span>{% else %}<span class="badge text-bg-warning">Inactive</span>{% endif %}</td>
             <td class="text-end text-nowrap">
               <a href="{% url 'listing_edit' listing.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
               {# Without JavaScript this opens a confirmation page; with HTMX it asks, then removes the row. #}
