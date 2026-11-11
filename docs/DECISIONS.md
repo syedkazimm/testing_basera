@@ -135,3 +135,9 @@ Each entry records a judgement call made while building Basera.
 - **Validation:** quantity must be a whole number from 1 up to the current stock; otherwise nothing changes and an error is shown (inline for HTMX). Another customer's cart item is a 404.
 - **Items that went bad** (species removed, deactivated, flagged invasive or sold out, or quantity above stock) stay visible but are highlighted, excluded from the grand total, and checkout (US-21) refuses to continue until they are fixed.
 - **Navbar:** "Cart" is now a link with the count badge.
+
+## US-21
+- **Two URL files:** the spec mounts the cart under `/cart/` and checkout under `/checkout/`, both owned by the `orders` app, so `orders/urls.py` holds the cart routes and `orders/checkout_urls.py` the checkout routes.
+- **Delivery details** are kept in the session (`checkout_delivery`) between the form and the summary page (no Order exists yet); coming back to the form shows what was typed. The form is prefilled from the profile (name, default address, default city, phone). All four fields are required and the phone uses the Pakistani regex.
+- **Guard:** checkout and the summary redirect to the cart if it is empty or has an item that is unavailable or above stock, and the summary redirects to the form if no details were saved.
+- **Payment** is shown as plain text "Cash on Delivery" (it is the only option, so there is nothing to choose).

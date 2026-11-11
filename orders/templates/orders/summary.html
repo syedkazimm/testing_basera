@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{# US-21: order summary before placing the order. #}
+{% block title %}Order summary{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Order summary</h1>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th>Plant</th><th class="text-end">Unit price</th><th class="text-end">Qty</th><th class="text-end">Line total</th></tr></thead>
+        <tbody>
+          {% for item in items %}
+            <tr><td>{{ item.species.common_name }}</td>
+                <td class="text-end">Rs {{ item.species.price|floatformat:"0g" }}</td>
+                <td class="text-end">{{ item.quantity }}</td>
+                <td class="text-end">Rs {{ item.line_total|floatformat:"0g" }}</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot><tr><th colspan="3" class="text-end">Grand total</th><th class="text-end">Rs {{ grand_total|floatformat:"0g" }}</th></tr></tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card"><div class="card-body">
+      <h2 class="h5">Deliver to</h2>
+      <p class="mb-2">{{ delivery.name }}<br>{{ delivery.address|linebreaksbr }}<br>{{ delivery.city }}<br>{{ delivery.phone }}</p>
+      <h2 class="h5">Payment</h2>
+      <p class="mb-3">Cash on Delivery</p>
+      <a href="{% url 'checkout' %}" class="btn btn-sm btn-outline-secondary">Change details</a>
+      {# The "Place order" button is added in US-22. #}
+    </div></div>
+  </div>
+</div>
+{% endblock %}

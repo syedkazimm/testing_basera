@@ -8,14 +8,15 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import FormView, TemplateView
 
 from accounts.mixins import CustomerRequiredMixin
 
-from basera.htmx import is_htmx
+from basera.htmx import is_htmx, redirect_to
 from catalog.models import Species
 from growprofiles.models import GrowProfile
 
+from .forms import DeliveryForm
 from .models import CartItem
 
 
@@ -159,3 +160,77 @@ class CartRemoveView(CartChangeView):
     def change(self, request, item):
         item.delete()
         return None
+
+
+# --- Checkout (US-21) ---------------------------------------------------------------------------
+DELIVERY_SESSION_KEY = "checkout_delivery"
+
+
+class CheckoutGuardMixin(CustomerRequiredMixin):
+    """Checkout needs a non-empty cart with nothing wrong in it; otherwise go back to the cart."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.is_customer:
+            cart = cart_context(request.user)
+            if not cart["items"]:
+                messages.info(request, "Your cart is empty.")
+                return redirect("cart")
+            if cart["has_problems"]:
+                messages.error(request, "Please fix the highlighted items in your cart before checking out.")
+                return redirect("cart")
+            self.cart = cart
+        return super().dispatch(request, *args, **kwargs)
+
+
+class CheckoutView(CheckoutGuardMixin, FormView):
+    """US-21: delivery details, prefilled from the profile. Valid details lead to the order summary.
+
+    HTMX: errors re-render only the form partial; success redirects with HX-Redirect.
+    """
+
+    form_class = DeliveryForm
+    template_name = "orders/checkout.html"
+
+    def get_template_names(self):
+        if is_htmx(self.request):
+            return ["orders/_checkout_form.html"]
+        return [self.template_name]
+
+    def get_initial(self):
+        # Use what the customer typed before if they came back from the summary, else the profile.
+        saved = self.request.session.get(DELIVERY_SESSION_KEY)
+        if saved:
+            return saved
+        user = self.request.user
+        return {
+            "name": f"{user.first_name} {user.last_name}".strip(),
+            "address": user.default_address,
+            "city": user.default_city,
+            "phone": user.phone,
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.cart)
+        return context
+
+    def form_valid(self, form):
+        self.request.session[DELIVERY_SESSION_KEY] = form.cleaned_data
+        return redirect_to(self.request, reverse("checkout_summary"))
+
+
+class CheckoutSummaryView(CheckoutGuardMixin, TemplateView):
+    """US-21: read-only order summary with the "Place order" button (the order itself is US-22)."""
+
+    template_name = "orders/summary.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and DELIVERY_SESSION_KEY not in request.session:
+            return redirect("checkout")  # delivery details come first
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.cart)
+        context["delivery"] = self.request.session[DELIVERY_SESSION_KEY]
+        return context

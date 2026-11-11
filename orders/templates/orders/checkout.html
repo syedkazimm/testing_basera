@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{# US-21: delivery details page. The form is a partial so HTMX can swap in errors. #}
+{% block title %}Delivery details{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8 col-lg-6">
+  <h1 class="h3 mb-3">Delivery details</h1>
+  {% include "orders/_checkout_form.html" %}
+</div></div>
+{% endblock %}

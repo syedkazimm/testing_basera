@@ -1,0 +1,11 @@
+{# US-21: delivery form partial (swapped in place by HTMX when validation fails). #}
+<form method="post" action="{% url 'checkout' %}" hx-post="{% url 'checkout' %}" hx-target="this" hx-swap="outerHTML" novalidate>
+  {% csrf_token %}
+  {% include "_form_fields.html" %}
+  <div class="mb-3">
+    <span class="form-label d-block">Payment method</span>
+    <span class="form-control-plaintext">Cash on Delivery &mdash; pay the courier when your plants arrive.</span>
+  </div>
+  <button type="submit" class="btn btn-basera">Review order</button>
+  <a href="{% url 'cart' %}" class="btn btn-link">Back to cart</a>
+</form>
