@@ -6,6 +6,7 @@
   {% endif %}
   {% if user.is_customer %}
     <li class="nav-item"><a class="nav-link" href="{% url 'cart' %}">Cart {% include "orders/_cart_badge.html" %}</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'order_list' %}">My orders</a></li>
   {% endif %}
   {% if user.is_seller %}
     <li class="nav-item"><a class="nav-link" href="{% url 'listing_list' %}">My listings</a></li>

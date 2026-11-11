@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{# US-23: "My Orders", newest first. #}
+{% block title %}My orders{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">My orders</h1>
+{% if orders %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Order</th><th>Date</th><th>Status</th><th class="text-end">Total</th></tr></thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td><a href="{% url 'order_detail' order.pk %}">{{ order.number }}</a></td>
+            <td>{{ order.created_at|date:"j M Y" }}</td>
+            <td><span class="badge {% if order.status == 'CANCELLED' %}text-bg-secondary{% elif order.status == 'DELIVERED' %}text-bg-success{% else %}text-bg-info{% endif %}">{{ order.get_status_display }}</span></td>
+            <td class="text-end">Rs {{ order.total|floatformat:"0g" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="alert alert-info">You have not placed any orders yet. <a href="{% url 'catalogue' %}" class="alert-link">Browse the catalogue</a>.</div>
+{% endif %}
+{% endblock %}

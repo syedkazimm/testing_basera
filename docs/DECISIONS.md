@@ -148,3 +148,7 @@ Each entry records a judgement call made while building Basera.
 - **Confirmation page:** the order page `/orders/<id>/` shows a "Thank you" banner when opened with `?placed=1` (the redirect after placing). It is the same page My Orders links to, so no extra URL was added.
 - **Email:** sent with `transaction.on_commit`, so it only goes out if the order was really saved; `fail_silently=True` so a mail problem never undoes an order. It prints on the console locally.
 - **Grow profile:** taken from the session (`grow_profile_id`, set when adding from match results) and only used if it still belongs to the customer; the session keys for delivery and profile are cleared after the order.
+
+## US-23
+- **My Orders** (`/orders/`) lists only the logged-in customer's orders, newest first, with number, date, status badge and total. The order page now also shows the grow profile used (name and region) when the link still exists; after a profile is deleted the line is simply left out.
+- **Navbar:** a "My orders" link for customers.

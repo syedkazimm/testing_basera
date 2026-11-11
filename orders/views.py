@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
-from django.views.generic import DetailView, FormView, TemplateView
+from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from accounts.mixins import CustomerRequiredMixin
 
@@ -338,9 +338,20 @@ def send_confirmation_email(order):
     send_mail(f"Basera order {order.number} confirmed", body, None, [order.customer.email], fail_silently=True)
 
 
-class OrderDetailView(CustomerRequiredMixin, DetailView):
-    """The order page: items, delivery details and status. Doubles as the confirmation page (?placed=1).
+class OrderListView(CustomerRequiredMixin, ListView):
+    """US-23: "My Orders", newest first (only the logged-in customer's own orders)."""
 
+    template_name = "orders/order_list.html"
+    context_object_name = "orders"
+
+    def get_queryset(self):
+        return Order.objects.filter(customer=self.request.user).order_by("-created_at", "-id")
+
+
+class OrderDetailView(CustomerRequiredMixin, DetailView):
+    """US-23: one order - items, delivery details, status and the grow profile used (if any).
+
+    Doubles as the confirmation page after checkout (?placed=1, US-22).
     Another customer's order is simply not found (404).
     """
 
@@ -348,7 +359,7 @@ class OrderDetailView(CustomerRequiredMixin, DetailView):
     context_object_name = "order"
 
     def get_queryset(self):
-        return Order.objects.filter(customer=self.request.user).prefetch_related("items")
+        return Order.objects.filter(customer=self.request.user).select_related("grow_profile__region").prefetch_related("items")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

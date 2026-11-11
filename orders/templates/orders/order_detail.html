@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{# US-22: order page and confirmation page (?placed=1). More details are added by US-23. #}
+{# US-22 / US-23: order page and confirmation page (?placed=1). #}
 {% block title %}Order {{ order.number }}{% endblock %}
 {% block content %}
 {% if just_placed %}
@@ -35,9 +35,14 @@
       <h2 class="h5">Delivered to</h2>
       <p>{{ order.delivery_name }}<br>{{ order.delivery_address|linebreaksbr }}<br>{{ order.delivery_city }}<br>{{ order.delivery_phone }}</p>
       <h2 class="h5">Payment</h2>
-      <p class="mb-0">{{ order.get_payment_method_display }}</p>
+      <p>{{ order.get_payment_method_display }}</p>
+      {% if order.grow_profile %}
+        <h2 class="h5">Grow profile used</h2>
+        <p class="mb-0">{{ order.grow_profile.name }} ({{ order.grow_profile.region.name }})</p>
+      {% endif %}
     </div></div>
   </div>
 </div>
+<a href="{% url 'order_list' %}" class="btn btn-outline-secondary mt-3">All my orders</a>
 <a href="{% url 'catalogue' %}" class="btn btn-outline-basera mt-3">Keep browsing</a>
 {% endblock %}
