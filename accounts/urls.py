@@ -11,6 +11,7 @@ urlpatterns = [
     # Logging out is a POST (Django 5 requirement); it ends the session and lands on home.
     path("logout/", LogoutView.as_view(), name="logout"),
     path("signup/", views.SignupView.as_view(), name="signup"),
+    path("password-change/", views.ChangePasswordView.as_view(), name="password_change"),  # US-04
     # US-03: forgot password (the four built-in pages)
     path("password-reset/", views.PasswordResetRequestView.as_view(), name="password_reset"),
     path("password-reset/done/",

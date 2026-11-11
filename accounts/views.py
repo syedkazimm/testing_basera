@@ -9,7 +9,7 @@ from django.views.generic import CreateView
 
 from basera.htmx import is_htmx, redirect_to
 
-from .forms import LoginForm, ResetConfirmForm, ResetRequestForm, SignupForm
+from .forms import ChangePasswordForm, LoginForm, ResetConfirmForm, ResetRequestForm, SignupForm
 
 
 class SignupView(CreateView):
@@ -71,3 +71,19 @@ class PasswordResetConfirmPageView(auth_views.PasswordResetConfirmView):
     form_class = ResetConfirmForm
     template_name = "accounts/password_reset_confirm.html"
     success_url = reverse_lazy("password_reset_complete")
+
+
+class ChangePasswordView(auth_views.PasswordChangeView):
+    """US-04: change password while logged in.
+
+    Django's view keeps the user logged in afterwards (update_session_auth_hash) and requires
+    the current password. Logged-out visitors are sent to login first.
+    """
+
+    form_class = ChangePasswordForm
+    template_name = "accounts/password_change.html"
+    success_url = reverse_lazy("password_change")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Your password has been updated.")
+        return super().form_valid(form)

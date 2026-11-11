@@ -77,3 +77,6 @@ Each entry records a judgement call made while building Basera.
 - **Built-in views:** forgot-password uses Django's own reset views with subclassed forms and our templates (`accounts/password_reset_*.html`). Unknown emails get the same "check your email" page and no email is sent.
 - **Link lifetime:** `PASSWORD_RESET_TIMEOUT` is one hour. A link stops working once the password changes because Django's token includes the password hash.
 - **Email text:** plain-text email printed on the console; subject "Reset your Basera password".
+
+## US-04
+- **After a successful change** the user stays on the change-password page with a green "Your password has been updated." message (the profile page arrives in US-05). The page is linked from My Profile.
