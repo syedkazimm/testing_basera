@@ -113,5 +113,6 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Basera <noreply@baser
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "login"
 LOGOUT_REDIRECT_URL = "home"
+PASSWORD_RESET_TIMEOUT = 60 * 60  # password-reset links work for one hour
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

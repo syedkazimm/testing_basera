@@ -1,14 +1,15 @@
 """Views for the accounts app."""
 
 from django.contrib import messages
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView
 
 from basera.htmx import is_htmx, redirect_to
 
-from .forms import LoginForm, SignupForm
+from .forms import LoginForm, ResetConfirmForm, ResetRequestForm, SignupForm
 
 
 class SignupView(CreateView):
@@ -54,3 +55,19 @@ class BaseraLoginView(LoginView):
         if user.role == "SELLER":
             return "/seller/listings/"  # "My Listings" (built in Sprint 2)
         return "/profiles/"  # "My Grow Profiles"
+
+
+# --- US-03: forgot password (Django's built-in views with our templates and forms) ---------------
+# Unknown emails get the same "check your email" page, so nobody can find out who has an account.
+class PasswordResetRequestView(auth_views.PasswordResetView):
+    form_class = ResetRequestForm
+    template_name = "accounts/password_reset_form.html"
+    email_template_name = "accounts/password_reset_email.txt"
+    subject_template_name = "accounts/password_reset_subject.txt"
+    success_url = reverse_lazy("password_reset_done")
+
+
+class PasswordResetConfirmPageView(auth_views.PasswordResetConfirmView):
+    form_class = ResetConfirmForm
+    template_name = "accounts/password_reset_confirm.html"
+    success_url = reverse_lazy("password_reset_complete")

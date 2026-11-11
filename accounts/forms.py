@@ -1,7 +1,8 @@
 """Forms for the accounts app."""
 
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import (AuthenticationForm, PasswordChangeForm, PasswordResetForm,
+                                       SetPasswordForm)
 from django.contrib.auth.password_validation import validate_password
 
 from basera.forms import BootstrapFormMixin
@@ -68,3 +69,15 @@ class LoginForm(BootstrapFormMixin, AuthenticationForm):
     def clean_username(self):
         # Emails are stored lower-case, so compare in lower-case.
         return self.cleaned_data["username"].lower()
+
+
+class ResetRequestForm(BootstrapFormMixin, PasswordResetForm):
+    """US-03: ask for a password-reset email."""
+
+
+class ResetConfirmForm(BootstrapFormMixin, SetPasswordForm):
+    """US-03: choose a new password (same rules as sign-up)."""
+
+
+class ChangePasswordForm(BootstrapFormMixin, PasswordChangeForm):
+    """US-04: change password; the current password must be right."""

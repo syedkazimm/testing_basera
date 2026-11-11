@@ -72,3 +72,8 @@ Each entry records a judgement call made while building Basera.
 - **Error pages:** `templates/403.html`, `404.html` (extend the base layout) and `500.html` (standalone, so it cannot fail). They show when `DEBUG=False`.
 - **Deployment files:** `build.sh`, `Procfile` and `render.yaml` (web service plus free PostgreSQL). The blueprint generates `SECRET_KEY` and `DEMO_PASSWORD`. The live URL is not known until the user deploys, so the README leaves a placeholder.
 - **Not done in Sprint 1:** the optional stretch story US-07 is built in Sprint 2 (step 9), as the build order lists it there too.
+
+## US-03
+- **Built-in views:** forgot-password uses Django's own reset views with subclassed forms and our templates (`accounts/password_reset_*.html`). Unknown emails get the same "check your email" page and no email is sent.
+- **Link lifetime:** `PASSWORD_RESET_TIMEOUT` is one hour. A link stops working once the password changes because Django's token includes the password hash.
+- **Email text:** plain-text email printed on the console; subject "Reset your Basera password".
