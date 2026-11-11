@@ -1,5 +1,7 @@
 """Catalogue views: public browsing (US-18, US-12) and the seller's listings (US-13 onwards)."""
 
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
@@ -70,13 +72,44 @@ class OwnListingMixin(SellerRequiredMixin):
 
 
 class ListingListView(SellerRequiredMixin, ListView):
-    """US-13 / US-16: "My Listings" - only the logged-in seller's own, non-removed listings."""
+    """US-16: "My Listings" dashboard - only the logged-in seller's own, non-removed listings.
 
-    template_name = "catalog/seller_listing_list.html"
+    Search by name, filter Active/Inactive, 10 per page. The table is a partial so HTMX can
+    update it in place; the same URL works as a normal page.
+    """
+
+    paginate_by = 10
     context_object_name = "listings"
 
     def get_queryset(self):
-        return Species.objects.filter(seller=self.request.user, is_deleted=False).order_by("common_name")
+        queryset = Species.objects.filter(seller=self.request.user, is_deleted=False).order_by("common_name")
+        self.query = self.request.GET.get("q", "").strip()
+        self.status = self.request.GET.get("status", "")
+        if self.query:
+            queryset = queryset.filter(
+                Q(common_name__icontains=self.query) | Q(scientific_name__icontains=self.query)
+            )
+        if self.status in Species.Status.values:
+            queryset = queryset.filter(status=self.status)
+        else:
+            self.status = ""
+        return queryset
+
+    def get_template_names(self):
+        if is_htmx(self.request):
+            return ["catalog/_listing_table.html"]
+        return ["catalog/seller_listing_list.html"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        params = {key: value for key, value in (("q", self.query), ("status", self.status)) if value}
+        context.update(
+            query=self.query,
+            status=self.status,
+            base_query=urlencode(params),  # kept on the paging links
+            has_filters=bool(params),
+        )
+        return context
 
 
 class ListingFormMixin:

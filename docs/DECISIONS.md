@@ -115,3 +115,7 @@ Each entry records a judgement call made while building Basera.
 ## US-15
 - **Availability and stock** are fields on the listing form (create and edit): a seller sets stock (0 = "Out of stock") and Active/Inactive there. There is no separate toggle page. An inactive listing disappears from the catalogue, details page and matching for customers, but the seller still sees it (with an "Inactive" badge).
 - **Automatic stock changes:** stock goes down when an order is placed and back up on cancellation; both are built with the order stories (US-22, US-24). The "cannot be added to a cart" rule for stock 0 is enforced in US-19.
+
+## US-16
+- **Dashboard behaviour:** search matches common or scientific name (case-insensitive); the status filter is All / Active / Inactive; 10 per page; the query is always limited to the logged-in seller's own non-removed listings, so no other seller's listing can appear.
+- **HTMX:** search typing (300 ms delay), the status select and paging links update only the `#listing-table` block, and the address bar is kept shareable with `hx-push-url`.

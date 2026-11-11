@@ -1,35 +1,38 @@
 {% extends "base.html" %}
-{# US-13: "My Listings" (search, filter and paging are added by US-16). #}
+{# US-16: "My Listings" dashboard. The table is a partial so HTMX can update it in place. #}
 {% block title %}My listings{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="h3 mb-0">My listings</h1>
   <a href="{% url 'listing_new' %}" class="btn btn-basera">New listing</a>
 </div>
-{% if listings %}
-  <div class="table-responsive">
-    <table class="table align-middle">
-      <thead><tr><th>Name</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
-      <tbody>
-        {% for listing in listings %}
-          <tr id="listing-{{ listing.pk }}">
-            <td><a href="{% url 'species_detail' listing.pk %}">{{ listing.common_name }}</a></td>
-            <td>Rs {{ listing.price|floatformat:"0g" }}</td>
-            <td>{{ listing.stock }}{% if not listing.in_stock %} <span class="badge text-bg-secondary">Out of stock</span>{% endif %}</td>
-            <td>{% if listing.status == "ACTIVE" %}<span class="badge text-bg-success">Active</span>{% else %}<span class="badge text-bg-warning">Inactive</span>{% endif %}</td>
-            <td class="text-end text-nowrap">
-              <a href="{% url 'listing_edit' listing.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-              {# Without JavaScript this opens a confirmation page; with HTMX it asks, then removes the row. #}
-              <a href="{% url 'listing_delete' listing.pk %}" class="btn btn-sm btn-outline-danger"
-                 hx-post="{% url 'listing_delete' listing.pk %}" hx-confirm="Remove the listing {{ listing.common_name }}?"
-                 hx-target="#listing-{{ listing.pk }}" hx-swap="outerHTML swap:200ms">Remove</a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+
+{# HTMX: search and the status filter update the table in place; without JavaScript the form still works. #}
+<form method="get" action="{% url 'listing_list' %}" class="row g-2 mb-3"
+      hx-get="{% url 'listing_list' %}" hx-trigger="keyup changed delay:300ms from:#q, change from:#status, search from:#q"
+      hx-target="#listing-table" hx-push-url="true" hx-indicator="#listing-spinner">
+  <div class="col-12 col-md">
+    <label for="q" class="visually-hidden">Search my listings by name</label>
+    <input type="search" id="q" name="q" value="{{ query }}" class="form-control" autocomplete="off"
+           placeholder="Search my listings by name">
   </div>
-{% else %}
-  <div class="alert alert-info">You have no listings yet. <a href="{% url 'listing_new' %}" class="alert-link">Create your first listing</a>.</div>
-{% endif %}
+  <div class="col-8 col-md-3">
+    <label for="status" class="visually-hidden">Status</label>
+    <select name="status" id="status" class="form-select">
+      <option value="">All statuses</option>
+      <option value="ACTIVE" {% if status == "ACTIVE" %}selected{% endif %}>Active</option>
+      <option value="INACTIVE" {% if status == "INACTIVE" %}selected{% endif %}>Inactive</option>
+    </select>
+  </div>
+  <div class="col-4 col-md-auto">
+    <button type="submit" class="btn btn-basera">Search</button>
+    <span id="listing-spinner" class="spinner-border spinner-border-sm text-success htmx-indicator" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </span>
+  </div>
+</form>
+
+<div id="listing-table">
+  {% include "catalog/_listing_table.html" %}
+</div>
 {% endblock %}

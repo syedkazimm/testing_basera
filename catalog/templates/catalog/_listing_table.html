@@ -1,0 +1,49 @@
+{# US-16: the seller's listings table + paging (rendered alone for HTMX requests). #}
+{% if listings %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th></th><th>Name</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for listing in listings %}
+          <tr id="listing-{{ listing.pk }}">
+            <td style="width: 64px;"><img src="{{ listing.image_url }}" alt="{{ listing.common_name }}" width="48" height="48" class="rounded" style="object-fit: cover;"></td>
+            <td><a href="{% url 'species_detail' listing.pk %}">{{ listing.common_name }}</a>
+                <div class="small text-muted fst-italic">{{ listing.scientific_name }}</div></td>
+            <td>Rs {{ listing.price|floatformat:"0g" }}</td>
+            <td>{{ listing.stock }}{% if not listing.in_stock %} <span class="badge text-bg-secondary">Out of stock</span>{% endif %}</td>
+            <td>{% if listing.status == "ACTIVE" %}<span class="badge text-bg-success">Active</span>{% else %}<span class="badge text-bg-warning">Inactive</span>{% endif %}</td>
+            <td class="text-end text-nowrap">
+              <a href="{% url 'listing_edit' listing.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              {# Without JavaScript this opens a confirmation page; with HTMX it asks, then removes the row. #}
+              <a href="{% url 'listing_delete' listing.pk %}" class="btn btn-sm btn-outline-danger"
+                 hx-post="{% url 'listing_delete' listing.pk %}" hx-confirm="Remove the listing {{ listing.common_name }}?"
+                 hx-target="#listing-{{ listing.pk }}" hx-swap="outerHTML swap:200ms">Remove</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if is_paginated %}
+    <nav aria-label="Listing pages">
+      <ul class="pagination justify-content-center flex-wrap">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?{% if base_query %}{{ base_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"
+              hx-get="{% url 'listing_list' %}?{% if base_query %}{{ base_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"
+              hx-target="#listing-table" hx-push-url="true">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?{% if base_query %}{{ base_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}"
+              hx-get="{% url 'listing_list' %}?{% if base_query %}{{ base_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}"
+              hx-target="#listing-table" hx-push-url="true">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+{% elif has_filters %}
+  <div class="alert alert-info">No listings match your search.
+    <a href="{% url 'listing_list' %}" class="alert-link" hx-get="{% url 'listing_list' %}" hx-target="#listing-table" hx-push-url="true">Show all</a></div>
+{% else %}
+  <div class="alert alert-info">You have no listings yet. <a href="{% url 'listing_new' %}" class="alert-link">Create your first listing</a>.</div>
+{% endif %}
