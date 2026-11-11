@@ -24,6 +24,16 @@
           <span class="fw-semibold ms-1">Rs {{ species.price|floatformat:"0g" }}</span>
         </div>
 
+        <ul class="list-unstyled small mb-2">
+          {% for reason in result.reasons %}
+            <li class="{% if reason.state == 'match' %}text-success{% elif reason.state == 'partial' %}text-warning-emphasis{% else %}text-danger{% endif %}">
+              <span aria-hidden="true">{{ reason.symbol }}</span>
+              <span class="visually-hidden">{{ reason.state }}:</span>
+              {{ reason.text }}
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="small mb-2"><strong>Ecological benefit:</strong> {{ species.ecological_benefit }}</p>
         <a href="{% url 'species_detail' species.pk %}" class="btn btn-sm btn-outline-basera">View details</a>
       </div>
     </div>

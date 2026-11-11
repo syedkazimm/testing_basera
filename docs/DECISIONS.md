@@ -57,3 +57,6 @@ Each entry records a judgement call made while building Basera.
 - **Hard filters in one query:** `Species.objects.visible().filter(regions=profile.region, is_invasive=False)`; scoring happens in Python (about 20 ms for the 21 matches in the demo data).
 - **Access:** another customer's profile gives a 404; sellers get a 403; guests go to login.
 - **Add to cart** buttons and storing the profile in the session arrive with the cart (US-19, US-22).
+
+## US-09
+- **Reason display:** each match card lists five lines (sunlight, soil, water, indoor/outdoor, purpose) with a symbol and colour (✔ match, ◐ partial, ✘ no match). Screen readers also get the words "match", "partial" or "no match". The species' ecological benefit appears on every card.
