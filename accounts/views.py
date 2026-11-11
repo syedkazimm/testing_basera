@@ -2,14 +2,16 @@
 
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 
 from basera.htmx import is_htmx, redirect_to
 
-from .forms import ChangePasswordForm, LoginForm, ResetConfirmForm, ResetRequestForm, SignupForm
+from .forms import (ChangePasswordForm, LoginForm, ProfileForm, ResetConfirmForm, ResetRequestForm,
+                    SignupForm)
 
 
 class SignupView(CreateView):
@@ -87,3 +89,27 @@ class ChangePasswordView(auth_views.PasswordChangeView):
     def form_valid(self, form):
         messages.success(self.request, "Your password has been updated.")
         return super().form_valid(form)
+
+
+class ProfileView(LoginRequiredMixin, UpdateView):
+    """US-05: "My Profile" - view and edit your own details (any logged-in role).
+
+    The object is always request.user, so nobody can open someone else's profile.
+    HTMX: errors re-render only the form partial; success reloads the page with a message.
+    """
+
+    form_class = ProfileForm
+    template_name = "accounts/profile.html"
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get_template_names(self):
+        if is_htmx(self.request):
+            return ["accounts/_profile_form.html"]
+        return [self.template_name]
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, "Your profile has been updated.")
+        return redirect_to(self.request, reverse("profile"))

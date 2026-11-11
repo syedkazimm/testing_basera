@@ -80,3 +80,7 @@ Each entry records a judgement call made while building Basera.
 
 ## US-04
 - **After a successful change** the user stays on the change-password page with a green "Your password has been updated." message (the profile page arrives in US-05). The page is linked from My Profile.
+
+## US-05
+- **Any logged-in user** (customer, seller or admin) can open `/accounts/profile/`; it always edits the current user, so there is no way to open another user's profile. First and last name are required, phone is optional and validated, and email and role are shown read-only (the form does not contain them, so a forged POST cannot change them).
+- **Navbar:** a "Profile (full name)" link replaces the plain name label.

@@ -81,3 +81,17 @@ class ResetConfirmForm(BootstrapFormMixin, SetPasswordForm):
 
 class ChangePasswordForm(BootstrapFormMixin, PasswordChangeForm):
     """US-04: change password; the current password must be right."""
+
+
+class ProfileForm(BootstrapFormMixin, forms.ModelForm):
+    """US-05: the details a user may edit. Email and role are not here, so they stay read-only."""
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "phone", "default_address", "default_city"]
+        widgets = {"default_address": forms.Textarea(attrs={"rows": 3})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True

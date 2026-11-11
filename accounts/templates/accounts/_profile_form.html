@@ -1,0 +1,6 @@
+{# US-05: profile form partial (swapped in place by HTMX when validation fails). #}
+<form method="post" action="{% url 'profile' %}" hx-post="{% url 'profile' %}" hx-target="this" hx-swap="outerHTML" novalidate>
+  {% csrf_token %}
+  {% include "_form_fields.html" %}
+  <button type="submit" class="btn btn-basera">Save changes</button>
+</form>

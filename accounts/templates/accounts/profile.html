@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{# US-05: My Profile page. Email and role are read-only; the editable form is a partial. #}
+{% block title %}My profile{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8 col-lg-6">
+  <h1 class="h3 mb-3">My profile</h1>
+  <dl class="row">
+    <dt class="col-sm-4">Email</dt><dd class="col-sm-8">{{ user.email }}</dd>
+    <dt class="col-sm-4">Role</dt>
+    <dd class="col-sm-8">{% if user.is_staff %}Administrator{% else %}{{ user.get_role_display }}{% endif %}</dd>
+  </dl>
+  {% include "accounts/_profile_form.html" %}
+  <hr>
+  <a href="{% url 'password_change' %}">Change password</a>
+</div></div>
+{% endblock %}

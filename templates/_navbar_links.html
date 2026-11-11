@@ -8,7 +8,7 @@
 </ul>
 <ul class="navbar-nav align-items-lg-center">
   {% if user.is_authenticated %}
-    <li class="nav-item"><span class="navbar-text me-lg-2">{{ user.full_name }}</span></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Profile ({{ user.full_name }})</a></li>
     <li class="nav-item">
       {# Logout must be a POST #}
       <form method="post" action="{% url 'logout' %}">
