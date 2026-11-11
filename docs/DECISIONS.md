@@ -34,3 +34,8 @@ Each entry records a judgement call made while building Basera.
 - **Naturalised plants:** Aloe vera and Marigold are kept, with a note in their ecological benefit that they are widely naturalised rather than strictly native (as the spec allows).
 - **Species images:** seeded species have no uploaded image and show `static/img/placeholder.png` (a generated leaf graphic), which the spec allows ("images may be placeholders"). `static/img/species/` is left empty.
 - **Admin:** species can be edited in the admin with regions as an inline; `is_invasive` is editable there (and nowhere else).
+
+## US-18 (with the invasive warning from US-10)
+- **HTMX timing:** the catalogue already splits its results into `catalog/_species_results.html`, and the view returns only that partial for HTMX requests. The `hx-*` attributes on the search box are added in the Sprint 1 wrap-up, as the build order says.
+- **Ordering and search:** results are sorted by common name; search matches common or scientific name, case-insensitively, and keeps the search text when paging.
+- **Catalogue cards** show the badge "Invasive — not sold" for invasive species, "Out of stock" at zero stock and "In stock" otherwise. Add-to-cart buttons arrive in Sprint 2 (US-19), so cards have only "View details" for now.

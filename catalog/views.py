@@ -1,3 +1,36 @@
-from django.shortcuts import render
+"""Public catalogue views (US-18, US-12)."""
 
-# Create your views here.
+from django.db.models import Q
+from django.views.generic import ListView
+
+from .models import Species
+
+
+class CatalogueView(ListView):
+    """US-18 (+ US-10 warning): browse and search visible species, 12 per page.
+
+    The results block is its own partial so HTMX can swap only that block (added in the
+    Sprint 1 wrap-up); a normal request renders the full page that includes the same partial.
+    """
+
+    paginate_by = 12
+    context_object_name = "species_list"
+
+    def get_queryset(self):
+        queryset = Species.objects.visible().order_by("common_name")
+        self.query = self.request.GET.get("q", "").strip()
+        if self.query:
+            queryset = queryset.filter(
+                Q(common_name__icontains=self.query) | Q(scientific_name__icontains=self.query)
+            )
+        return queryset
+
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request"):
+            return ["catalog/_species_results.html"]
+        return ["catalog/catalogue.html"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["query"] = self.query
+        return context

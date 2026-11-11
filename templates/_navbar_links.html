@@ -1,6 +1,7 @@
 {# Navbar links. Extended story by story; ends up role-aware (SPEC section 8). #}
 <ul class="navbar-nav me-auto">
   <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+  <li class="nav-item"><a class="nav-link" href="{% url 'catalogue' %}">Catalogue</a></li>
 </ul>
 <ul class="navbar-nav align-items-lg-center">
   {% if user.is_authenticated %}

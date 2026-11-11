@@ -1,0 +1,26 @@
+{# US-18: results grid + pagination. Rendered alone for HTMX requests. #}
+{% if species_list %}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
+    {% for species in species_list %}
+      <div class="col">{% include "catalog/_species_card.html" %}</div>
+    {% endfor %}
+  </div>
+  {% if is_paginated %}
+    <nav class="mt-4" aria-label="Catalogue pages">
+      <ul class="pagination justify-content-center flex-wrap">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+{% else %}
+  <div class="alert alert-info">
+    No plants found{% if query %} for &ldquo;{{ query }}&rdquo;{% endif %}.
+    {% if query %}<a href="{% url 'catalogue' %}">Show all plants</a>{% endif %}
+  </div>
+{% endif %}

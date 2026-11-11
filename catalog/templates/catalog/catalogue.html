@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{# US-18: catalogue page with a search box. The results live in a partial (HTMX-ready). #}
+{% block title %}Catalogue{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Native plant catalogue</h1>
+<form method="get" action="{% url 'catalogue' %}" class="row g-2 mb-4" role="search">
+  <div class="col">
+    <label for="q" class="visually-hidden">Search by common or scientific name</label>
+    <input type="search" id="q" name="q" value="{{ query }}" class="form-control"
+           placeholder="Search by common or scientific name">
+  </div>
+  <div class="col-auto"><button type="submit" class="btn btn-basera">Search</button></div>
+</form>
+<div id="results">
+  {% include "catalog/_species_results.html" %}
+</div>
+{% endblock %}

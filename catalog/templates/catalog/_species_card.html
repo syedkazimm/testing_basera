@@ -1,0 +1,19 @@
+{# Species card used by the catalogue (and later by match results). Needs `species`. #}
+<div class="card h-100 species-card">
+  <img src="{{ species.image_url }}" class="card-img-top" alt="{{ species.common_name }}">
+  <div class="card-body d-flex flex-column">
+    <h2 class="h5 card-title mb-0">{{ species.common_name }}</h2>
+    <p class="text-muted fst-italic small mb-2">{{ species.scientific_name }}</p>
+    <div class="mb-2">
+      {% if species.is_invasive %}
+        <span class="badge text-bg-danger">Invasive &mdash; not sold</span>
+      {% elif not species.in_stock %}
+        <span class="badge text-bg-secondary">Out of stock</span>
+      {% else %}
+        <span class="badge text-bg-success">In stock</span>
+      {% endif %}
+    </div>
+    <p class="fw-semibold mb-3">Rs {{ species.price|floatformat:"0g" }}</p>
+    <a href="#" class="btn btn-outline-basera mt-auto">View details</a>
+  </div>
+</div>
