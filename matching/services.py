@@ -6,9 +6,10 @@ reasons can never contradict the score.
 """
 
 from dataclasses import dataclass, field
+from decimal import Decimal, InvalidOperation
 
 from catalog.models import Species
-from growprofiles.models import Soil, Sunlight, Water
+from growprofiles.models import Purpose, Soil, Sunlight, Water
 
 # Weights add up to 100 (SPEC 6.1).
 WEIGHTS = {"sunlight": 30, "soil": 25, "water": 20, "setting": 15, "purpose": 10}
@@ -146,3 +147,64 @@ def find_matches(profile):
     results = [score_species(species, profile) for species in candidate_species(profile)]
     results.sort(key=lambda result: (-result.score, result.species.common_name))
     return results
+
+
+# --- Filters and sorting for the results page (US-11) ----------------------------------------
+SORTS = {
+    "score": lambda r: (-r.score, r.species.common_name),
+    "price_asc": lambda r: (r.species.price, -r.score, r.species.common_name),
+    "price_desc": lambda r: (-r.species.price, -r.score, r.species.common_name),
+}
+FILTER_LABELS = {"purpose": "Purpose", "setting": "Indoor/outdoor", "max_price": "Max price"}
+
+
+def parse_filters(params):
+    """Read the filters from GET parameters. Unknown or invalid values are simply ignored."""
+    filters = {}
+    purpose = params.get("purpose", "")
+    if purpose in Purpose.values:
+        filters["purpose"] = purpose
+    setting = params.get("setting", "")
+    if setting in ("INDOOR", "OUTDOOR"):
+        filters["setting"] = setting
+    try:
+        max_price = Decimal(params.get("max_price", "").strip())
+        if max_price > 0:
+            filters["max_price"] = max_price
+    except (InvalidOperation, AttributeError):
+        pass
+    return filters
+
+
+def _passes(species, filters):
+    """True if one species satisfies every active filter."""
+    if "purpose" in filters and filters["purpose"] not in species.purposes_list:
+        return False
+    # A species that grows BOTH indoors and outdoors fits either choice.
+    if "setting" in filters and species.setting not in (filters["setting"], "BOTH"):
+        return False
+    if "max_price" in filters and species.price > filters["max_price"]:
+        return False
+    return True
+
+
+def apply_filters(results, filters, sort="score"):
+    """Filter the already-scored list, then sort it (default: best score first)."""
+    kept = [result for result in results if _passes(result.species, filters)]
+    kept.sort(key=SORTS.get(sort, SORTS["score"]))
+    return kept
+
+
+def relax_suggestions(results, filters):
+    """When filters leave nothing: for each active filter, how many species it alone is hiding.
+
+    Returns [{"key", "label", "count"}, ...] with the most helpful first; filters that would
+    not bring back anything are left out.
+    """
+    suggestions = []
+    for key in filters:
+        remaining = {k: v for k, v in filters.items() if k != key}
+        count = sum(1 for result in results if _passes(result.species, remaining))
+        if count:
+            suggestions.append({"key": key, "label": FILTER_LABELS[key], "count": count})
+    return sorted(suggestions, key=lambda item: -item["count"])

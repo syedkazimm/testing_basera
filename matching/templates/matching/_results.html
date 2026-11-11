@@ -1,10 +1,39 @@
-{# US-08 / US-10: the shortlist block (rendered alone for HTMX requests). #}
+{# US-08 / US-10 / US-11: chips and the shortlist (rendered alone for HTMX filter changes). #}
+{% if chips %}
+  <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+    <span class="small text-muted">Filters:</span>
+    {% for chip in chips %}
+      <a href="{{ chip.url }}" class="badge rounded-pill text-bg-light border text-decoration-none"
+         hx-get="{{ chip.url }}" hx-target="#shortlist" hx-push-url="true" hx-indicator="#match-spinner"
+         aria-label="Remove filter {{ chip.text }}">{{ chip.text }} &times;</a>
+    {% endfor %}
+    <a href="{% url 'match' profile.pk %}" class="small"
+       hx-get="{% url 'match' profile.pk %}" hx-target="#shortlist" hx-push-url="true">Clear filters</a>
+  </div>
+{% endif %}
+
 {% if results %}
-  <p class="text-muted">{{ results|length }} native plant{{ results|length|pluralize }}, best fit first.</p>
+  <p class="text-muted">
+    {{ results|length }}{% if filters %} of {{ total_count }}{% endif %} native plant{{ results|length|pluralize }}{% if sort == "score" %}, best fit first{% endif %}.
+  </p>
   <div class="row row-cols-1 row-cols-lg-2 g-3">
     {% for result in results %}
       <div class="col">{% include "matching/_match_card.html" %}</div>
     {% endfor %}
+  </div>
+{% elif filters %}
+  <div class="alert alert-info">
+    <h2 class="h5">No native species match these filters</h2>
+    {% if suggestions %}
+      <p class="mb-1">Try relaxing one:</p>
+      <ul class="mb-0">
+        {% for item in suggestions %}
+          <li>Remove the <strong>{{ item.label }}</strong> filter to see {{ item.count }} plant{{ item.count|pluralize }}.</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <a href="{% url 'match' profile.pk %}" class="alert-link"
+       hx-get="{% url 'match' profile.pk %}" hx-target="#shortlist" hx-push-url="true">Clear all filters</a>
   </div>
 {% else %}
   <div class="alert alert-info">

@@ -89,3 +89,9 @@ Each entry records a judgement call made while building Basera.
 - **Delete flow:** without JavaScript the Delete link opens a confirmation page (POST to delete). With HTMX the same link asks with `hx-confirm`, posts, and the server answers with an empty body so the row disappears in place.
 - **Orders:** the `Order.grow_profile` link (set to NULL when a profile is deleted) is created with the Order model in Sprint 2, so the "orders keep existing" rule is enforced there by `on_delete=SET_NULL`.
 - **Ownership:** edit and delete use the same owner-filtered queryset as the list, so another customer's profile is a 404 for both viewing and posting.
+
+## US-11
+- **Filters:** `purpose` (species lists it), `setting` (Indoor or Outdoor; a species that grows BOTH matches either), `max_price` (price at or below) and `sort` (`score`, `price_asc`, `price_desc`). Invalid values are ignored rather than shown as errors. Scoring runs once; filters and sorting only work on the scored list.
+- **HTMX targets:** changing a control swaps only `#results` (so keyboard focus stays in the controls); clicking a chip or "Clear filters" swaps the whole `#shortlist` block (controls and results) so the controls reset too. The view tells them apart with the `HX-Target` header. A spinner shows while scoring.
+- **No result with filters:** the page lists, for each active filter, how many plants removing just that filter would bring back (the "relax one criterion" suggestion), most helpful first. This is the version of the US-10 suggestion that matters, since the five criteria only change the score and never hide a species.
+- **Price sort ties** fall back to best score, then name.

@@ -1,0 +1,45 @@
+{# US-11: the filter controls plus the shortlist. Swapped as one block by "Clear filters" and chips. #}
+<form method="get" action="{% url 'match' profile.pk %}" class="row g-2 align-items-end mb-3"
+      hx-get="{% url 'match' profile.pk %}" hx-trigger="change, keyup changed delay:400ms from:#max_price"
+      hx-target="#results" hx-push-url="true" hx-indicator="#match-spinner">
+  <div class="col-6 col-md-3">
+    <label for="purpose" class="form-label small mb-0">Purpose</label>
+    <select name="purpose" id="purpose" class="form-select form-select-sm">
+      <option value="">Any</option>
+      {% for code, label in purposes %}
+        <option value="{{ code }}" {% if filters.purpose == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-md-3">
+    <label for="setting" class="form-label small mb-0">Indoor / outdoor</label>
+    <select name="setting" id="setting" class="form-select form-select-sm">
+      <option value="">Any</option>
+      <option value="INDOOR" {% if filters.setting == "INDOOR" %}selected{% endif %}>Indoor</option>
+      <option value="OUTDOOR" {% if filters.setting == "OUTDOOR" %}selected{% endif %}>Outdoor</option>
+    </select>
+  </div>
+  <div class="col-6 col-md-2">
+    <label for="max_price" class="form-label small mb-0">Max price (Rs)</label>
+    <input type="number" min="1" step="1" name="max_price" id="max_price" value="{{ max_price_value }}"
+           class="form-control form-control-sm">
+  </div>
+  <div class="col-6 col-md-3">
+    <label for="sort" class="form-label small mb-0">Sort by</label>
+    <select name="sort" id="sort" class="form-select form-select-sm">
+      <option value="score" {% if sort == "score" %}selected{% endif %}>Best match</option>
+      <option value="price_asc" {% if sort == "price_asc" %}selected{% endif %}>Price: low to high</option>
+      <option value="price_desc" {% if sort == "price_desc" %}selected{% endif %}>Price: high to low</option>
+    </select>
+  </div>
+  <div class="col-12 col-md-1 d-flex align-items-center gap-2">
+    <noscript><button type="submit" class="btn btn-sm btn-basera">Apply</button></noscript>
+    <span id="match-spinner" class="spinner-border spinner-border-sm text-success htmx-indicator" role="status">
+      <span class="visually-hidden">Scoring...</span>
+    </span>
+  </div>
+</form>
+
+<div id="results">
+  {% include "matching/_results.html" %}
+</div>
