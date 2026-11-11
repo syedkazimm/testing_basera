@@ -1,0 +1,6 @@
+{# US-01: sign-up form partial. Swapped in place by HTMX when validation fails. #}
+<form method="post" action="{% url 'signup' %}" hx-post="{% url 'signup' %}" hx-target="this" hx-swap="outerHTML" novalidate>
+  {% csrf_token %}
+  {% include "_form_fields.html" %}
+  <button type="submit" class="btn btn-basera">Sign up</button>
+</form>

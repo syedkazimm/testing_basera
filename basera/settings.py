@@ -109,4 +109,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Basera <noreply@basera.test>")
 
+# --- Accounts (US-01 / US-02) -----------------------------------------------
+AUTH_USER_MODEL = "accounts.User"
+LOGIN_URL = "/accounts/login/"
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

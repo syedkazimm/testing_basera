@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{# US-01: sign-up page. The form itself is a partial so HTMX can swap in errors. #}
+{% block title %}Sign up{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <h1 class="h3 mb-3">Create your account</h1>
+    {% include "accounts/_signup_form.html" %}
+    <p class="mt-3">Already have an account? <a href="/accounts/login/">Log in</a></p>
+  </div>
+</div>
+{% endblock %}

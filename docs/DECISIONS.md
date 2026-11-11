@@ -9,3 +9,10 @@ Each entry records a judgement call made while building Basera.
 - **Python version:** developed on Python 3.12 in a local `.venv` (git-ignored). Dependencies are pinned in `requirements.txt`.
 - **Static assets:** Bootstrap 5.3.3 from jsDelivr and HTMX 2.0.4 from unpkg, both pinned.
 - **Home buttons:** the two home buttons are placeholders until the catalogue and grow profile pages exist; they are wired in later stories.
+
+## US-01
+- **Shared form helper:** `basera/forms.py` holds `BootstrapFormMixin` (adds Bootstrap CSS classes to widgets) and `templates/_form_fields.html` renders any form with inline errors. Every form in the project reuses them.
+- **Phone validator:** `accounts/validators.py` holds the Pakistani phone regex so checkout can reuse it later.
+- **Sign-up form:** first and last name are required on sign-up (the model allows blank so admin-created accounts need not have them). Role choices are only Customer and Seller; `is_staff` is not on the form.
+- **Sign-up with HTMX:** the form is a partial; errors swap in place and success uses `HX-Redirect` to the login page.
+- **Login link:** until US-02 adds the named `login` URL, templates link to `/accounts/login/` directly.
