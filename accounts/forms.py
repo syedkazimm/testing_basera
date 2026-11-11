@@ -1,6 +1,7 @@
 """Forms for the accounts app."""
 
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.password_validation import validate_password
 
 from basera.forms import BootstrapFormMixin
@@ -53,3 +54,17 @@ class SignupForm(BootstrapFormMixin, forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class LoginForm(BootstrapFormMixin, AuthenticationForm):
+    """US-02: log in with email. One generic error so we never reveal which field was wrong."""
+
+    username = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={"autofocus": True}))
+    error_messages = {
+        "invalid_login": "Incorrect email or password.",
+        "inactive": "Incorrect email or password.",
+    }
+
+    def clean_username(self):
+        # Emails are stored lower-case, so compare in lower-case.
+        return self.cleaned_data["username"].lower()

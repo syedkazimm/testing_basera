@@ -16,3 +16,9 @@ Each entry records a judgement call made while building Basera.
 - **Sign-up form:** first and last name are required on sign-up (the model allows blank so admin-created accounts need not have them). Role choices are only Customer and Seller; `is_staff` is not on the form.
 - **Sign-up with HTMX:** the form is a partial; errors swap in place and success uses `HX-Redirect` to the login page.
 - **Login link:** until US-02 adds the named `login` URL, templates link to `/accounts/login/` directly.
+
+## US-02
+- **Role landing pages:** customer goes to `/profiles/`, seller to `/seller/listings/`, admin to `/admin/`. The customer and seller pages are built in later stories, so those two paths show a 404 until their stories land (the seller page arrives in Sprint 2).
+- **Login form:** the generic error text is "Incorrect email or password." for wrong password, unknown email and inactive accounts alike. Email is lower-cased before checking.
+- **Logout:** a POST button in the navbar (Django 5's `LogoutView` rejects GET); it lands on home.
+- **Logged-in visitors** who open the login or sign-up page are sent on (login → their landing page, sign-up → home).

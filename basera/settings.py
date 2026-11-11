@@ -111,6 +111,7 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Basera <noreply@baser
 
 # --- Accounts (US-01 / US-02) -----------------------------------------------
 AUTH_USER_MODEL = "accounts.User"
-LOGIN_URL = "/accounts/login/"
+LOGIN_URL = "login"
+LOGOUT_REDIRECT_URL = "home"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
