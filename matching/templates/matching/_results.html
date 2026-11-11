@@ -7,5 +7,12 @@
     {% endfor %}
   </div>
 {% else %}
-  <div class="alert alert-info">No native species match this profile.</div>
+  <div class="alert alert-info">
+    <h2 class="h5">No native species match this profile</h2>
+    <p class="mb-0">
+      No native plants are listed for {{ profile.region.name }} right now. Try
+      <a href="{% url 'profile_new' %}" class="alert-link">a profile for a nearby region</a>,
+      or <a href="{% url 'catalogue' %}" class="alert-link">browse the whole catalogue</a>.
+    </p>
+  </div>
 {% endif %}

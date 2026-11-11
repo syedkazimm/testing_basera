@@ -60,3 +60,7 @@ Each entry records a judgement call made while building Basera.
 
 ## US-09
 - **Reason display:** each match card lists five lines (sunlight, soil, water, indoor/outdoor, purpose) with a symbol and colour (✔ match, ◐ partial, ✘ no match). Screen readers also get the words "match", "partial" or "no match". The species' ecological benefit appears on every card.
+
+## US-10
+- **Invasive species** are excluded by the matching hard filter and show a warning banner and badge (no add-to-cart) in the catalogue and on detail pages (done in US-18 and US-12).
+- **No-match suggestion:** the only hard filters are region, visibility and non-invasive, and the five criteria only change the score, so an empty shortlist means no native species are listed for that region. The message therefore suggests choosing a profile for a nearby region or browsing the catalogue. The "which criterion to relax" count applies to the US-11 filters and is added there.
