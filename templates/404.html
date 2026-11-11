@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{# Friendly 404 page. #}
+{% block title %}Page not found{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+  <h1 class="display-4 text-basera">404</h1>
+  <p class="lead">We could not find that page. The plant or page may have been removed.</p>
+  <a href="{% url 'home' %}" class="btn btn-basera">Go home</a>
+  <a href="{% url 'catalogue' %}" class="btn btn-outline-basera">Browse catalogue</a>
+</div>
+{% endblock %}

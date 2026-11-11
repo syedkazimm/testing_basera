@@ -9,11 +9,15 @@
     <nav class="mt-4" aria-label="Catalogue pages">
       <ul class="pagination justify-content-center flex-wrap">
         {% if page_obj.has_previous %}
-          <li class="page-item"><a class="page-link" href="?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Previous</a></li>
+          <li class="page-item"><a class="page-link" href="?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"
+             hx-get="{% url 'catalogue' %}?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"
+             hx-target="#results" hx-push-url="true">Previous</a></li>
         {% endif %}
         <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
         {% if page_obj.has_next %}
-          <li class="page-item"><a class="page-link" href="?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Next</a></li>
+          <li class="page-item"><a class="page-link" href="?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.next_page_number }}"
+             hx-get="{% url 'catalogue' %}?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.next_page_number }}"
+             hx-target="#results" hx-push-url="true">Next</a></li>
         {% endif %}
       </ul>
     </nav>
@@ -21,6 +25,6 @@
 {% else %}
   <div class="alert alert-info">
     No plants found{% if query %} for &ldquo;{{ query }}&rdquo;{% endif %}.
-    {% if query %}<a href="{% url 'catalogue' %}">Show all plants</a>{% endif %}
+    {% if query %}<a href="{% url 'catalogue' %}" hx-get="{% url 'catalogue' %}" hx-target="#results" hx-push-url="true">Show all plants</a>{% endif %}
   </div>
 {% endif %}

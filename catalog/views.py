@@ -3,6 +3,8 @@
 from django.db.models import Q
 from django.views.generic import DetailView, ListView
 
+from basera.htmx import is_htmx
+
 from .models import Species
 
 
@@ -26,7 +28,7 @@ class CatalogueView(ListView):
         return queryset
 
     def get_template_names(self):
-        if self.request.headers.get("HX-Request"):
+        if is_htmx(self.request):
             return ["catalog/_species_results.html"]
         return ["catalog/catalogue.html"]
 

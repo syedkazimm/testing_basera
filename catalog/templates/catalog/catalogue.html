@@ -3,13 +3,21 @@
 {% block title %}Catalogue{% endblock %}
 {% block content %}
 <h1 class="h3 mb-3">Native plant catalogue</h1>
+{# HTMX: results update as you type; the form still works as a normal GET without JavaScript. #}
 <form method="get" action="{% url 'catalogue' %}" class="row g-2 mb-4" role="search">
   <div class="col">
     <label for="q" class="visually-hidden">Search by common or scientific name</label>
     <input type="search" id="q" name="q" value="{{ query }}" class="form-control"
-           placeholder="Search by common or scientific name">
+           placeholder="Search by common or scientific name" autocomplete="off"
+           hx-get="{% url 'catalogue' %}" hx-trigger="keyup changed delay:300ms, search"
+           hx-target="#results" hx-push-url="true" hx-indicator="#search-spinner">
   </div>
-  <div class="col-auto"><button type="submit" class="btn btn-basera">Search</button></div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-basera">Search</button>
+    <span id="search-spinner" class="spinner-border spinner-border-sm text-success htmx-indicator" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </span>
+  </div>
 </form>
 <div id="results">
   {% include "catalog/_species_results.html" %}

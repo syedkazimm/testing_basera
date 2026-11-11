@@ -64,3 +64,11 @@ Each entry records a judgement call made while building Basera.
 ## US-10
 - **Invasive species** are excluded by the matching hard filter and show a warning banner and badge (no add-to-cart) in the catalogue and on detail pages (done in US-18 and US-12).
 - **No-match suggestion:** the only hard filters are region, visibility and non-invasive, and the five criteria only change the score, so an empty shortlist means no native species are listed for that region. The message therefore suggests choosing a profile for a nearby region or browsing the catalogue. The "which criterion to relax" count applies to the US-11 filters and is added there.
+
+## Sprint 1 wrap-up
+- **HTMX on the catalogue:** the search box uses `hx-trigger="keyup changed delay:300ms"` with `hx-push-url`, and the pagination links swap only the `#results` block; with JavaScript off, the form and links still work as normal pages.
+- **HTMX history restore:** when the Back button restores a page, HTMX sends `HX-Request` and `HX-History-Restore-Request` together; `is_htmx()` treats that as a full-page request so Back never shows a bare partial.
+- **HTMX on match results:** the match page has no filter or sort controls until US-11, so the spinner and in-place updates are added with those controls in Sprint 2. The shortlist is already a partial (`matching/_results.html`).
+- **Error pages:** `templates/403.html`, `404.html` (extend the base layout) and `500.html` (standalone, so it cannot fail). They show when `DEBUG=False`.
+- **Deployment files:** `build.sh`, `Procfile` and `render.yaml` (web service plus free PostgreSQL). The blueprint generates `SECRET_KEY` and `DEMO_PASSWORD`. The live URL is not known until the user deploys, so the README leaves a placeholder.
+- **Not done in Sprint 1:** the optional stretch story US-07 is built in Sprint 2 (step 9), as the build order lists it there too.
