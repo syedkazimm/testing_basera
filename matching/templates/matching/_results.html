@@ -1,0 +1,11 @@
+{# US-08 / US-10: the shortlist block (rendered alone for HTMX requests). #}
+{% if results %}
+  <p class="text-muted">{{ results|length }} native plant{{ results|length|pluralize }}, best fit first.</p>
+  <div class="row row-cols-1 row-cols-lg-2 g-3">
+    {% for result in results %}
+      <div class="col">{% include "matching/_match_card.html" %}</div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info">No native species match this profile.</div>
+{% endif %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{# US-08: ranked shortlist page for one grow profile. #}
+{% block title %}Plants for {{ profile.name }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'profile_list' %}">My profiles</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ profile.name }}</li>
+  </ol>
+</nav>
+<h1 class="h3">Native plants for &ldquo;{{ profile.name }}&rdquo;</h1>
+<p class="text-muted">
+  {{ profile.region.name }} &middot; {{ profile.get_space_type_display }} &middot;
+  {{ profile.get_sunlight_display }} &middot; {{ profile.get_soil_display }} soil &middot;
+  {{ profile.get_water_display }} water &middot; Goal: {{ profile.get_purpose_display }}
+</p>
+<div id="results">
+  {% include "matching/_results.html" %}
+</div>
+{% endblock %}

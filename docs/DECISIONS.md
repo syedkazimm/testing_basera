@@ -50,3 +50,10 @@ Each entry records a judgement call made while building Basera.
 - **Sample grow profile:** the seed command creates "Backyard" (Punjab Plains, outdoor, full sun, loam, medium water, shade and cooling) for the demo customer only if they have no profile yet.
 - **List page:** shows name, region and purpose. The "Find plants", Edit and Delete buttons arrive with US-08 and US-07.
 - **Navigation:** the "Find plants for my space" home button goes to My Profiles, where a profile is chosen or created.
+
+## US-08
+- **Rounding:** the score is rounded half up (62.5 → 63) rather than with Python's `round()` (banker's rounding), so it behaves the way people expect.
+- **One calculation:** `matching/services.py` scores and builds the reason lines in the same loop (`score_species`), so the two can never disagree. US-09 only adds how the reasons are displayed.
+- **Hard filters in one query:** `Species.objects.visible().filter(regions=profile.region, is_invasive=False)`; scoring happens in Python (about 20 ms for the 21 matches in the demo data).
+- **Access:** another customer's profile gives a 404; sellers get a 403; guests go to login.
+- **Add to cart** buttons and storing the profile in the session arrive with the cart (US-19, US-22).

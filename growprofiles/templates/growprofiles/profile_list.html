@@ -9,13 +9,14 @@
 {% if profiles %}
   <div class="table-responsive">
     <table class="table align-middle">
-      <thead><tr><th>Name</th><th>Region</th><th>Purpose</th></tr></thead>
+      <thead><tr><th>Name</th><th>Region</th><th>Purpose</th><th></th></tr></thead>
       <tbody>
         {% for profile in profiles %}
           <tr>
             <td>{{ profile.name }}</td>
             <td>{{ profile.region.name }}</td>
             <td>{{ profile.get_purpose_display }}</td>
+            <td class="text-end"><a href="{% url 'match' profile.pk %}" class="btn btn-sm btn-basera">Find plants</a></td>
           </tr>
         {% endfor %}
       </tbody>

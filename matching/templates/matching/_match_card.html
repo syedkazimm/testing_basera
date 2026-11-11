@@ -1,0 +1,32 @@
+{# US-08 / US-09: one match card. Needs `result` (species, score, reasons). #}
+{% with species=result.species %}
+<div class="card h-100">
+  <div class="row g-0 h-100">
+    <div class="col-sm-4">
+      <img src="{{ species.image_url }}" class="img-fluid rounded-start w-100 h-100" style="object-fit: cover; min-height: 140px;" alt="{{ species.common_name }}">
+    </div>
+    <div class="col-sm-8">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div>
+            <h2 class="h5 card-title mb-0">{{ species.common_name }}</h2>
+            <p class="text-muted fst-italic small mb-2">{{ species.scientific_name }}</p>
+          </div>
+          <span class="badge text-bg-success fs-6">{{ result.score }}%</span>
+        </div>
+        <div class="mb-2">
+          {% if result.low_fit %}<span class="badge text-bg-warning">Low fit</span>{% endif %}
+          {% if result.in_stock %}
+            <span class="badge text-bg-success">In stock</span>
+          {% else %}
+            <span class="badge text-bg-secondary">Out of stock</span>
+          {% endif %}
+          <span class="fw-semibold ms-1">Rs {{ species.price|floatformat:"0g" }}</span>
+        </div>
+
+        <a href="{% url 'species_detail' species.pk %}" class="btn btn-sm btn-outline-basera">View details</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endwith %}
