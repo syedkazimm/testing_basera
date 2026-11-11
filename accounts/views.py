@@ -2,10 +2,11 @@
 
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
-from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import CreateView
+
+from basera.htmx import is_htmx, redirect_to
 
 from .forms import LoginForm, SignupForm
 
@@ -21,7 +22,7 @@ class SignupView(CreateView):
     template_name = "accounts/signup.html"
 
     def get_template_names(self):
-        if self.request.headers.get("HX-Request"):
+        if is_htmx(self.request):
             return ["accounts/_signup_form.html"]
         return [self.template_name]
 
@@ -33,11 +34,7 @@ class SignupView(CreateView):
     def form_valid(self, form):
         form.save()
         messages.success(self.request, "Account created. Please log in.")
-        if self.request.headers.get("HX-Request"):
-            response = HttpResponse(status=204)
-            response["HX-Redirect"] = reverse("login")
-            return response
-        return redirect("login")
+        return redirect_to(self.request, reverse("login"))
 
 
 class BaseraLoginView(LoginView):

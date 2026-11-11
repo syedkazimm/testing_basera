@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 from accounts.models import User
 from catalog import seed_data
 from catalog.models import Species, SpeciesRegion
-from growprofiles.models import Region
+from growprofiles.models import GrowProfile, Region
 
 # Demo/test password only. In production set DEMO_PASSWORD to something private.
 DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "Basera-demo-2026")
@@ -28,6 +28,7 @@ class Command(BaseCommand):
         regions = self.create_regions()
         seller = User.objects.get(email="seller@basera.test")
         self.create_species(seller, regions)
+        self.create_sample_profile(regions)
         self.stdout.write(self.style.SUCCESS("Seed data is ready."))
 
     def create_accounts(self):
@@ -80,3 +81,14 @@ class Command(BaseCommand):
                 for code in region_codes.split():
                     SpeciesRegion.objects.create(species=species, region=regions[code])
         self.stdout.write(f"Species: {created} created, {len(seed_data.SPECIES) - created} already present.")
+
+    def create_sample_profile(self, regions):
+        """One sample grow profile for the demo customer (created only if they have none)."""
+        customer = User.objects.get(email="customer@basera.test")
+        if GrowProfile.objects.filter(customer=customer).exists():
+            return
+        GrowProfile.objects.create(
+            customer=customer, name="Backyard", region=regions["PP"], space_type="OUTDOOR",
+            sunlight="FULL_SUN", soil="LOAM", water="MEDIUM", purpose="SHADE_COOLING",
+        )
+        self.stdout.write("Created sample grow profile 'Backyard' for the demo customer.")

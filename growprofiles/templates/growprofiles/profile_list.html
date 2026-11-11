@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{# US-06: "My Grow Profiles" list. #}
+{% block title %}My grow profiles{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">My grow profiles</h1>
+  <a href="{% url 'profile_new' %}" class="btn btn-basera">New profile</a>
+</div>
+{% if profiles %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Name</th><th>Region</th><th>Purpose</th></tr></thead>
+      <tbody>
+        {% for profile in profiles %}
+          <tr>
+            <td>{{ profile.name }}</td>
+            <td>{{ profile.region.name }}</td>
+            <td>{{ profile.get_purpose_display }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="alert alert-info">
+    You have no grow profiles yet. A grow profile describes your space so Basera can suggest native plants.
+    <a href="{% url 'profile_new' %}" class="alert-link">Create your first profile</a>.
+  </div>
+{% endif %}
+{% endblock %}

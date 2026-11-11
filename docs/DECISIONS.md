@@ -43,3 +43,10 @@ Each entry records a judgement call made while building Basera.
 ## US-12
 - **Add to cart on the detail page:** the button is added with US-19 in Sprint 2. Until then the page shows stock state only (it already shows "Invasive — not sold" and "Out of stock" badges).
 - **Price format:** prices show as whole rupees with thousands separators (`Rs 1,250`); the stored value keeps two decimals.
+
+## US-06
+- **Permissions:** `accounts/mixins.py` defines `CustomerRequiredMixin` and `SellerRequiredMixin`. Logged-out visitors are redirected to login (with `?next=`); the wrong role gets a 403. Admins (staff) are not treated as customers or sellers.
+- **HTMX helpers:** `basera/htmx.py` has `is_htmx()` and `redirect_to()` (normal redirect, or `HX-Redirect` for HTMX). The sign-up view now uses them too.
+- **Sample grow profile:** the seed command creates "Backyard" (Punjab Plains, outdoor, full sun, loam, medium water, shade and cooling) for the demo customer only if they have no profile yet.
+- **List page:** shows name, region and purpose. The "Find plants", Edit and Delete buttons arrive with US-08 and US-07.
+- **Navigation:** the "Find plants for my space" home button goes to My Profiles, where a profile is chosen or created.

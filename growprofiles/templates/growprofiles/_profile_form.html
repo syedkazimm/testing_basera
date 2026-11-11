@@ -1,0 +1,7 @@
+{# US-06: grow profile form partial (swapped in place by HTMX when validation fails). #}
+<form method="post" action="{{ form_action }}" hx-post="{{ form_action }}" hx-target="this" hx-swap="outerHTML" novalidate>
+  {% csrf_token %}
+  {% include "_form_fields.html" %}
+  <button type="submit" class="btn btn-basera">Save profile</button>
+  <a href="{% url 'profile_list' %}" class="btn btn-link">Cancel</a>
+</form>
