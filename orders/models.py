@@ -25,3 +25,14 @@ class CartItem(models.Model):
     @property
     def line_total(self):
         return self.species.price * self.quantity
+
+    @property
+    def unavailable(self):
+        """True if this species can no longer be bought (removed, inactive, invasive or sold out)."""
+        sp = self.species
+        return sp.is_deleted or sp.status != Species.Status.ACTIVE or sp.is_invasive or sp.stock < 1
+
+    @property
+    def over_stock(self):
+        """True if the cart asks for more plants than the seller now has."""
+        return not self.unavailable and self.quantity > self.species.stock

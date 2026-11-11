@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{# US-20: the cart page. The cart block is a partial so HTMX can redraw it in place. #}
+{% block title %}My cart{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">My cart</h1>
+<div id="cart">
+  {% include "orders/_cart.html" %}
+</div>
+{% endblock %}

@@ -8,6 +8,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
+from django.views.generic import TemplateView
+
+from accounts.mixins import CustomerRequiredMixin
 
 from basera.htmx import is_htmx
 from catalog.models import Species
@@ -82,3 +85,77 @@ class CartAddView(View):
         profile_id = request.POST.get("profile", "")
         if profile_id.isdigit() and GrowProfile.objects.filter(pk=profile_id, customer=request.user).exists():
             request.session["grow_profile_id"] = int(profile_id)
+
+
+def cart_context(user, error=None):
+    """Everything the cart page/partial needs: the items, the grand total and any problems."""
+    items = list(CartItem.objects.filter(customer=user).select_related("species"))
+    total = sum(item.line_total for item in items if not item.unavailable)
+    return {
+        "items": items,
+        "grand_total": total,
+        "has_problems": any(item.unavailable or item.over_stock for item in items),
+        "cart_count": sum(item.quantity for item in items),
+        "error": error,
+    }
+
+
+class CartView(CustomerRequiredMixin, TemplateView):
+    """US-20: the cart page - items, line totals and the grand total."""
+
+    template_name = "orders/cart.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(cart_context(self.request.user))
+        return context
+
+
+class CartChangeView(CustomerRequiredMixin, View):
+    """Base for the two POST actions below: find MY cart item (anyone else's is a 404), act, redraw.
+
+    HTMX: reply with the cart block (rows, totals) plus the navbar badge out-of-band, so the page
+    updates in place. Without JavaScript: redirect back to the cart with a message.
+    """
+
+    http_method_names = ["post"]
+
+    def post(self, request, item_id):
+        item = get_object_or_404(CartItem.objects.select_related("species"), pk=item_id, customer=request.user)
+        error = self.change(request, item)
+        if is_htmx(request):
+            context = cart_context(request.user, error)
+            context["oob"] = True
+            return render(request, "orders/_cart.html", context)
+        if error:
+            messages.error(request, error)
+        return redirect("cart")
+
+    def change(self, request, item):
+        raise NotImplementedError
+
+
+class CartUpdateView(CartChangeView):
+    """US-20: set an item's quantity (between 1 and the available stock)."""
+
+    def change(self, request, item):
+        try:
+            quantity = int(request.POST.get("quantity", ""))
+        except ValueError:
+            return "Please enter a whole number for the quantity."
+        stock = item.species.stock
+        if quantity < 1:
+            return "The quantity must be at least 1. Use Remove to take the plant out of your cart."
+        if quantity > stock:
+            return f"Only {stock} {item.species.common_name} available."
+        item.quantity = quantity
+        item.save(update_fields=["quantity"])
+        return None
+
+
+class CartRemoveView(CartChangeView):
+    """US-20: remove an item from the cart."""
+
+    def change(self, request, item):
+        item.delete()
+        return None

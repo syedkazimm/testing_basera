@@ -129,3 +129,9 @@ Each entry records a judgement call made while building Basera.
 - **Grow profile for the order:** when the add button is pressed from a match page it posts the profile id, which is stored in the session (`grow_profile_id`) only if the profile belongs to that customer. US-22 attaches it to the order.
 - **Cart rules at add time:** stock 0, invasive, inactive or removed species are refused (404 for inactive/removed); repeating an add stops at the stock level with a message.
 - **Template note:** Django's `{# #}` comments must fit on one line, so longer notes in templates use `{% comment %}`.
+
+## US-20
+- **Cart page:** `/cart/` lists name, unit price, quantity, line total and the grand total. Quantity changes (on `change` in the box) and Remove post to `/cart/update/<id>/` and `/cart/remove/<id>/`; with HTMX the whole cart block and the navbar badge are redrawn in place, without JavaScript a normal post redirects back with a message.
+- **Validation:** quantity must be a whole number from 1 up to the current stock; otherwise nothing changes and an error is shown (inline for HTMX). Another customer's cart item is a 404.
+- **Items that went bad** (species removed, deactivated, flagged invasive or sold out, or quantity above stock) stay visible but are highlighted, excluded from the grand total, and checkout (US-21) refuses to continue until they are fixed.
+- **Navbar:** "Cart" is now a link with the count badge.
