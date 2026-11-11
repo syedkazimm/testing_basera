@@ -39,3 +39,7 @@ Each entry records a judgement call made while building Basera.
 - **HTMX timing:** the catalogue already splits its results into `catalog/_species_results.html`, and the view returns only that partial for HTMX requests. The `hx-*` attributes on the search box are added in the Sprint 1 wrap-up, as the build order says.
 - **Ordering and search:** results are sorted by common name; search matches common or scientific name, case-insensitively, and keeps the search text when paging.
 - **Catalogue cards** show the badge "Invasive — not sold" for invasive species, "Out of stock" at zero stock and "In stock" otherwise. Add-to-cart buttons arrive in Sprint 2 (US-19), so cards have only "View details" for now.
+
+## US-12
+- **Add to cart on the detail page:** the button is added with US-19 in Sprint 2. Until then the page shows stock state only (it already shows "Invasive — not sold" and "Out of stock" badges).
+- **Price format:** prices show as whole rupees with thousands separators (`Rs 1,250`); the stored value keeps two decimals.

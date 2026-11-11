@@ -1,7 +1,7 @@
 """Public catalogue views (US-18, US-12)."""
 
 from django.db.models import Q
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 
 from .models import Species
 
@@ -34,3 +34,16 @@ class CatalogueView(ListView):
         context = super().get_context_data(**kwargs)
         context["query"] = self.query
         return context
+
+
+class SpeciesDetailView(DetailView):
+    """US-12: details of one species. Inactive or removed species give a 404.
+
+    Invasive species get a warning banner and (in Sprint 2) no add-to-cart button.
+    """
+
+    context_object_name = "species"
+    template_name = "catalog/species_detail.html"
+
+    def get_queryset(self):
+        return Species.objects.visible().select_related("seller").prefetch_related("regions")

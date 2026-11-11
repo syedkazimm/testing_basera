@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{# US-12: species details page. #}
+{% block title %}{{ species.common_name }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'catalogue' %}">Catalogue</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ species.common_name }}</li>
+  </ol>
+</nav>
+
+{% if species.is_invasive %}
+  <div class="alert alert-danger" role="alert">
+    <strong>Invasive species &mdash; not sold on Basera.</strong>
+    This plant spreads aggressively and harms native plants and wildlife. Please choose a native alternative.
+  </div>
+{% endif %}
+
+<div class="row g-4">
+  <div class="col-md-5">
+    <img src="{{ species.image_url }}" class="img-fluid rounded w-100" alt="{{ species.common_name }}">
+  </div>
+  <div class="col-md-7">
+    <h1 class="h2 mb-0">{{ species.common_name }}</h1>
+    <p class="text-muted fst-italic">{{ species.scientific_name }}</p>
+
+    <p class="fs-4 fw-semibold text-basera mb-1">Rs {{ species.price|floatformat:"0g" }}</p>
+    <p>
+      {% if species.is_invasive %}
+        <span class="badge text-bg-danger">Invasive &mdash; not sold</span>
+      {% elif species.in_stock %}
+        <span class="badge text-bg-success">In stock ({{ species.stock }} available)</span>
+      {% else %}
+        <span class="badge text-bg-secondary">Out of stock</span>
+      {% endif %}
+    </p>
+
+    <p>{{ species.description }}</p>
+
+    <div class="alert alert-success py-2">
+      <strong>Ecological benefit:</strong> {{ species.ecological_benefit }}
+    </div>
+
+    <table class="table table-sm">
+      <tbody>
+        <tr><th scope="row" class="w-50">Plant type</th><td>{{ species.get_plant_type_display }}</td></tr>
+        <tr><th scope="row">Sunlight</th><td>{{ species.get_sunlight_display }}</td></tr>
+        <tr><th scope="row">Water needed</th><td>{{ species.get_water_display }}</td></tr>
+        <tr><th scope="row">Soil</th><td>{{ species.get_soil_display }}</td></tr>
+        <tr><th scope="row">Grows</th><td>{{ species.get_setting_display }}</td></tr>
+        <tr><th scope="row">Purposes</th><td>{{ species.purposes_display }}</td></tr>
+        <tr><th scope="row">Native to</th><td>{% for region in species.regions.all %}{{ region.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td></tr>
+        <tr><th scope="row">Sold by</th><td>{{ species.seller.full_name }}</td></tr>
+      </tbody>
+    </table>
+    {# The "Add to cart" button is added in Sprint 2 (US-19); it is hidden for invasive or out-of-stock species. #}
+  </div>
+</div>
+{% endblock %}
